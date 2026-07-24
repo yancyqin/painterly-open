@@ -31,10 +31,10 @@ const TARGETS = Object.freeze({
     shell: "src/game/assets/rooms/van-gogh-starry-studio-shell-v6a.jpg",
     output: "src/game/assets/live-projects/van-gogh-starry-studio-1b.json",
     // This owner-authored project deliberately exceeds the global 2,000-mark
-    // contract. The exact room-scoped exception passed owner visual/movement
-    // QA on a real phone on 2026-07-24; do not turn it into a global limit.
-    maxMarks: 4_910,
-    maxRuntimeBytes: 3 * 1024 * 1024,
+    // contract. Keep the exact exception room-scoped; the 6,140-mark Source
+    // Cover revision still requires owner visual/movement QA on a real phone.
+    maxMarks: 6_140,
+    maxRuntimeBytes: 4 * 1024 * 1024,
   },
   "van-gogh-cypress-bedroom-1c": {
     artHouse: "van-gogh-house",
@@ -227,6 +227,68 @@ const APPROVED_ADAPTERS = Object.freeze({
     photoOpacity: 78,
     photoBlur: 7,
   },
+  "sha256:49ebf0e7396970792b9ae961f2ddb653cccd1bb53dae42e77e9919c5dceaa3e3": {
+    kind: "curve-current",
+    speed: 50,
+    flow: 2,
+    startStagger: .38,
+    activeWindow: .55,
+    arriveAt: .78,
+    wobble: 4,
+    photoOpacity: 65,
+    photoBlur: 7,
+    cover: {
+      lead: .07,
+      restore: .12,
+      finalPause: .04,
+      red: 12,
+      green: 52,
+      blue: 94,
+      opacity: .96,
+    },
+  },
+  "sha256:0c1a4a780ced6a386ede7d4f4481e7eb04c48d524934b17935ef6913a6f51cb0": {
+    kind: "curve-current",
+    speed: 50,
+    flow: 3,
+    startStagger: .38,
+    activeWindow: .55,
+    arriveAt: .78,
+    wobble: 4,
+    photoOpacity: 65,
+    photoBlur: 7,
+    cover: {
+      lead: .07,
+      restore: .12,
+      finalPause: .04,
+      red: 7,
+      green: 54,
+      blue: 102,
+      opacity: .96,
+    },
+  },
+  "sha256:d0901e44ff29a8ceb32cdfabab8fe098db3734d98ce2775fb0daff24f7ed06b1": {
+    kind: "curve-current",
+    speed: 45,
+    flow: 4,
+    startStagger: .38,
+    activeWindow: .55,
+    arriveAt: .78,
+    wobble: 1,
+    photoOpacity: 35,
+    photoBlur: 7,
+    cover: {
+      lead: .07,
+      restore: .12,
+      finalPause: .04,
+      red: 125,
+      green: 100,
+      blue: 42,
+      opacity: .76,
+      startFade: .12,
+      endFade: .12,
+    },
+  },
 });
 
 function fail(message) {
@@ -281,7 +343,9 @@ function stripMark(mark, label) {
     blue: finite(mark.blue, `${label}.blue`, 0, 255),
     shape,
     softIdx: finite(mark.softIdx, `${label}.softIdx`, 0, 3),
-    angle: finite(mark.angle, `${label}.angle`, -Math.PI * 2, Math.PI * 2),
+    // Source Cover encodes its stationary role as -999 degrees, normalized by
+    // Art Lab to radians. Only a full approved revision can interpret it.
+    angle: finite(mark.angle, `${label}.angle`, -Math.PI * 6, Math.PI * 2),
     glow: mark.glow === true,
     life: finite(mark.life, `${label}.life`, 0, 30),
     born: finite(mark.born, `${label}.born`, 0, 1_000_000),

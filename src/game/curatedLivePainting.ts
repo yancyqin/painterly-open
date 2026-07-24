@@ -119,6 +119,17 @@ interface CurveCurrentAdapter {
   wobble: number;
   photoOpacity: number;
   photoBlur: number;
+  cover?: {
+    lead: number;
+    restore: number;
+    finalPause: number;
+    red: number;
+    green: number;
+    blue: number;
+    opacity: number;
+    startFade?: number;
+    endFade?: number;
+  };
 }
 
 type CuratedMarkAdapter =
@@ -165,6 +176,7 @@ export interface CuratedLiveDrawStages {
   markLimit?: number;
   flatDots?: boolean;
   atlasSoftMarks?: boolean;
+  curveRole?: "cover" | "moving";
 }
 
 interface WarpSlice {
@@ -195,6 +207,7 @@ interface PreparedMark extends CuratedLiveMark {
   curveStartDistance: number;
   curveSideDistance: number;
   curveOrder: number;
+  curveCover: boolean;
 }
 
 interface PreparedCurvePoint {
@@ -376,24 +389,44 @@ function speedScale(speed: number): number {
   return .15 + clamp(speed, 0, 100) / 100 * 1.85;
 }
 
+function smoothstep01(value: number): number {
+  const progress = clamp(value, 0, 1);
+  return progress * progress * (3 - 2 * progress);
+}
+
 function prepareCurvePath(
   marks: readonly CuratedLiveMark[],
   adapter: CurveCurrentAdapter,
 ): { path: PreparedCurvePath | null; starts: { distance: number; side: number; order: number }[] } {
   const flow = Math.floor(adapter.flow);
   if (flow < 1 || flow > 8) throw new Error("Curve Current flow is out of bounds");
+  if (adapter.cover && marks.length % flow !== 0) {
+    throw new Error("Curve Current Source Cover cohort is incomplete");
+  }
   const points: PreparedCurvePoint[] = [];
   let total = 0;
   for (let offset = 0; offset < marks.length; offset += flow) {
     const end = Math.min(marks.length, offset + flow);
     let x = 0;
     let y = 0;
-    for (let index = offset; index < end; index += 1) {
-      x += marks[index]!.x;
-      y += marks[index]!.y;
+    if (adapter.cover) {
+      const coverMark = marks[offset]!;
+      if (coverMark.angle >= -10) throw new Error("Curve Current Source Cover sentinel is missing");
+      for (let index = offset + 1; index < end; index += 1) {
+        if (marks[index]!.angle < -10) throw new Error("Curve Current Source Cover cohort has multiple covers");
+      }
+      // The cover is born at the actual hand point. Use it instead of the
+      // side-scattered moving pigments to reconstruct the authored curve.
+      x = coverMark.x;
+      y = coverMark.y;
+    } else {
+      for (let index = offset; index < end; index += 1) {
+        x += marks[index]!.x;
+        y += marks[index]!.y;
+      }
+      x /= end - offset;
+      y /= end - offset;
     }
-    x /= end - offset;
-    y /= end - offset;
     const before = points.at(-1);
     if (before) {
       const step = Math.hypot(x - before.x, y - before.y);
@@ -731,6 +764,9 @@ export class CuratedLiveRoomRenderer {
               curveStartDistance: curve?.starts[markIndex]?.distance ?? 0,
               curveSideDistance: curve?.starts[markIndex]?.side ?? 0,
               curveOrder: curve?.starts[markIndex]?.order ?? 0,
+              curveCover: adapter.kind === "curve-current"
+                && Boolean(adapter.cover)
+                && mark.angle < -10,
             };
           }),
         };
@@ -945,6 +981,10 @@ export class CuratedLiveRoomRenderer {
       if (stages?.markKinds && !stages.markKinds.includes(adapter.kind)) continue;
       const brushTime = layerSeconds * speedScale(adapter.speed);
       for (const mark of stroke.marks) {
+        if (adapter.kind === "curve-current" && stages?.curveRole) {
+          if (stages.curveRole === "cover" && !mark.curveCover) continue;
+          if (stages.curveRole === "moving" && mark.curveCover) continue;
+        }
         if (markBudget.remaining <= 0) return;
         markBudget.remaining -= 1;
         const output = this.resolveMark(mark, stroke, brushTime, layerSeconds);
@@ -1046,74 +1086,107 @@ export class CuratedLiveRoomRenderer {
     } else if (adapter.kind === "curve-current") {
       const path = stroke.curvePath;
       if (!path || mark.life <= 0) return null;
-      const globalProgress = clamp(age / mark.life, 0, 1);
-      const startTime = mark.curveOrder * adapter.startStagger;
-      const endTime = startTime + adapter.activeWindow;
-      if (globalProgress < startTime || globalProgress >= endTime) return null;
-      const localProgress = clamp(
-        (globalProgress - startTime) / Math.max(.001, adapter.activeWindow),
-        0,
-        1,
-      );
-      if (localProgress < adapter.arriveAt) {
-        const progress = localProgress / Math.max(.001, adapter.arriveAt);
-        const eased = progress * progress * (3 - 2 * progress);
-        const targetDistance = mark.curveStartDistance
-          + (path.total - mark.curveStartDistance) * eased;
-        let upperIndex = 1;
-        if (targetDistance >= path.total) {
-          upperIndex = path.points.length - 1;
-        } else if (targetDistance > 0) {
-          let low = 1;
-          let high = path.points.length - 1;
-          while (low < high) {
-            const middle = Math.floor((low + high) / 2);
-            if (path.points[middle]!.distance < targetDistance) low = middle + 1;
-            else high = middle;
-          }
-          upperIndex = low;
+      const cover = adapter.cover;
+      const lifeProgress = clamp(age / mark.life, 0, 1);
+      const movementDuration = cover
+        ? mark.life / (1 + cover.restore + cover.finalPause)
+        : mark.life;
+      const globalProgress = age / Math.max(.001, movementDuration);
+      const runtimeFade = lifeProgress <= .7
+        ? 1
+        : Math.max(.001, (1 - lifeProgress) / .3);
+
+      if (cover && mark.curveCover) {
+        const moveStart = cover.lead + mark.curveOrder * adapter.startStagger;
+        const coverStart = moveStart - cover.lead;
+        const moveEnd = moveStart + adapter.activeWindow;
+        const restoreEnd = moveEnd + cover.restore;
+        let desiredAlpha = 0;
+        if (globalProgress >= coverStart && globalProgress < moveStart) {
+          desiredAlpha = cover.opacity * smoothstep01(
+            (globalProgress - coverStart) / Math.max(.001, cover.lead),
+          );
+        } else if (globalProgress >= moveStart && globalProgress < moveEnd) {
+          desiredAlpha = cover.opacity;
+        } else if (globalProgress >= moveEnd && globalProgress < restoreEnd) {
+          desiredAlpha = cover.opacity * (1 - smoothstep01(
+            (globalProgress - moveEnd) / Math.max(.001, cover.restore),
+          ));
         }
-        const before = path.points[upperIndex - 1]!;
-        const after = path.points[upperIndex]!;
-        const segmentLength = Math.max(.0001, after.distance - before.distance);
-        const amount = clamp((targetDistance - before.distance) / segmentLength, 0, 1);
-        const tangentX = (after.x - before.x) / segmentLength;
-        const tangentY = (after.y - before.y) / segmentLength;
-        const side = mark.curveSideDistance * (1 - eased) ** .8;
-        const wobble = Math.sin(progress * Math.PI * 3.6 + mark.seed * Math.PI * 2)
-          * adapter.wobble
-          * Math.sin(progress * Math.PI);
-        const sideways = side + wobble;
-        x = before.x + (after.x - before.x) * amount - tangentY * sideways;
-        y = before.y + (after.y - before.y) * amount + tangentX * sideways;
-        angle = Math.atan2(tangentY, tangentX);
-        const fadeIn = clamp(progress / .12, 0, 1);
-        const smoothFadeIn = fadeIn * fadeIn * (3 - 2 * fadeIn);
-        sizeMultiplier = .72 + Math.sin(progress * Math.PI) * .62;
-        const desiredAlpha = .86 * smoothFadeIn;
-        const runtimeFade = globalProgress <= .7
-          ? 1
-          : Math.max(.001, (1 - globalProgress) / .3);
-        alpha = Math.min(1, desiredAlpha / runtimeFade)
-          * clamp(adapter.photoOpacity, 0, 100) / 100;
+        if (cover.startFade && cover.endFade) {
+          desiredAlpha *= smoothstep01(mark.curveOrder / Math.max(.001, cover.startFade))
+            * smoothstep01((1 - mark.curveOrder) / Math.max(.001, cover.endFade));
+        }
+        alpha = Math.min(1, desiredAlpha / runtimeFade);
+        red = cover.red;
+        green = cover.green;
+        blue = cover.blue;
+        x = mark.x;
+        y = mark.y;
+        angle = 0;
       } else {
-        const progress = (localProgress - adapter.arriveAt) / Math.max(.001, 1 - adapter.arriveAt);
-        const inward = progress * progress * (3 - 2 * progress);
-        x = path.endpointX;
-        y = path.endpointY;
-        angle = path.endpointAngle;
-        sizeMultiplier = .72 * (1 - inward) ** .62 + .01;
-        const desiredAlpha = .86 * (1 - inward) ** .58;
-        const runtimeFade = globalProgress <= .7
-          ? 1
-          : Math.max(.001, (1 - globalProgress) / .3);
-        alpha = Math.min(1, desiredAlpha / runtimeFade)
-          * clamp(adapter.photoOpacity, 0, 100) / 100;
+        const startTime = (cover?.lead ?? 0) + mark.curveOrder * adapter.startStagger;
+        const endTime = startTime + adapter.activeWindow;
+        if (globalProgress < startTime || globalProgress >= endTime) return null;
+        const localProgress = clamp(
+          (globalProgress - startTime) / Math.max(.001, adapter.activeWindow),
+          0,
+          1,
+        );
+        if (localProgress < adapter.arriveAt) {
+          const progress = localProgress / Math.max(.001, adapter.arriveAt);
+          const eased = progress * progress * (3 - 2 * progress);
+          const targetDistance = mark.curveStartDistance
+            + (path.total - mark.curveStartDistance) * eased;
+          let upperIndex = 1;
+          if (targetDistance >= path.total) {
+            upperIndex = path.points.length - 1;
+          } else if (targetDistance > 0) {
+            let low = 1;
+            let high = path.points.length - 1;
+            while (low < high) {
+              const middle = Math.floor((low + high) / 2);
+              if (path.points[middle]!.distance < targetDistance) low = middle + 1;
+              else high = middle;
+            }
+            upperIndex = low;
+          }
+          const before = path.points[upperIndex - 1]!;
+          const after = path.points[upperIndex]!;
+          const segmentLength = Math.max(.0001, after.distance - before.distance);
+          const amount = clamp((targetDistance - before.distance) / segmentLength, 0, 1);
+          const tangentX = (after.x - before.x) / segmentLength;
+          const tangentY = (after.y - before.y) / segmentLength;
+          const side = mark.curveSideDistance * (1 - eased) ** .8;
+          const wobble = Math.sin(progress * Math.PI * 3.6 + mark.seed * Math.PI * 2)
+            * adapter.wobble
+            * Math.sin(progress * Math.PI);
+          const sideways = side + wobble;
+          x = before.x + (after.x - before.x) * amount - tangentY * sideways;
+          y = before.y + (after.y - before.y) * amount + tangentX * sideways;
+          angle = Math.atan2(tangentY, tangentX);
+          const fadeIn = clamp(progress / .12, 0, 1);
+          const smoothFadeIn = fadeIn * fadeIn * (3 - 2 * fadeIn);
+          sizeMultiplier = .72 + Math.sin(progress * Math.PI) * .62;
+          const desiredAlpha = .86 * smoothFadeIn;
+          alpha = Math.min(1, desiredAlpha / runtimeFade)
+            * clamp(adapter.photoOpacity, 0, 100) / 100;
+        } else {
+          const progress = (localProgress - adapter.arriveAt) / Math.max(.001, 1 - adapter.arriveAt);
+          const inward = progress * progress * (3 - 2 * progress);
+          x = path.endpointX;
+          y = path.endpointY;
+          angle = path.endpointAngle;
+          sizeMultiplier = .72 * (1 - inward) ** .62 + .01;
+          const desiredAlpha = .86 * (1 - inward) ** .58;
+          alpha = Math.min(1, desiredAlpha / runtimeFade)
+            * clamp(adapter.photoOpacity, 0, 100) / 100;
+        }
+        softIdx = Math.max(
+          softIdx,
+          Math.round(Math.max(.45, clamp(adapter.photoBlur, 0, 40) / 40) * 3),
+        );
       }
-      softIdx = Math.max(
-        softIdx,
-        Math.round(Math.max(.45, clamp(adapter.photoBlur, 0, 40) / 40) * 3),
-      );
     } else {
       const wanderAge = Math.min(age, 4);
       const angle = Math.sin(layerSeconds * .57 + mark.seed * 11) * Math.PI * 1.7

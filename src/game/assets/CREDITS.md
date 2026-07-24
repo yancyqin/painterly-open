@@ -15,6 +15,13 @@ Generated for this project with OpenAI's built-in image generation tool on
 remain in Codex's generated-image store under generation thread
 `019f69a8-aa13-75e3-a8cf-5e34c39b506c`.
 
+## Public social image
+
+- `public/og-painterly-chameleon.jpg` — owner-supplied Painterly Chameleon
+  promotional composite, supplied by Yanxiang Qin on 2026-07-24. It is resized
+  from the supplied 4112 × 2404 JPEG to 1600 × 935 for web delivery, preserving
+  its original aspect ratio. Used by the public site and social previews.
+
 ## Active v6 Van Gogh House gallery shells
 
 The runtime uses these nine 960 × 640 plates. A/B/C share the same camera and
@@ -140,9 +147,10 @@ recorded in `content/live-projects/FINAL-FIXTURES.md`.
 
 - Final 1A is now the editable source and generated runtime used by the Phase 1
   single-Canvas control page.
-- The Curve Current 1B supplied on 2026-07-24 is the editable source at
+- The Source Cover 1B supplied on 2026-07-24 is the editable source at
   `content/live-projects/van-gogh-starry-studio-1b.lpp`; its generated runtime
-  passed owner visual/mobile movement QA on 2026-07-24.
+  is ready for owner visual/mobile movement QA. The previously approved Curve
+  Current archive remains in `final-fixtures/`.
 - Final 1C replaced the earlier runtime source at
   `content/live-projects/van-gogh-cypress-bedroom-1c.lpp`; its generated
   runtime is ready for owner visual/mobile QA.
@@ -161,12 +169,13 @@ runtime JSON or executed by Painterly Chameleon.
   `rooms/van-gogh-starry-studio-shell-v6a.jpg` (SHA-256
   `34684e067ca29b9219b00e6949463d70e5b6f7bbeab106f7f14063c708a2cbab`).
 - The imported `.lpp` SHA-256 is
-  `1b26be2478043bb57b0abd1cc0130ae2c70061061d5e3b29eb727cca9d734cd9`.
-- The browser receives 4,910 declarative marks and reviewed static Color
-  Liquify Splash, directional Color Liquify Breakout, Stars/Twinkle and Curve
-  Current adapters. Their source-derived pigments are packed into one shared
-  atlas; Curve Current path starts and structure are prepared once. The archive
-  retains Function Brush source, but generated runtime data does not.
+  `f5c2c632d22e80b35c2a5697af4d65c21787f57459d20e79f1a5759489bfb806`.
+- The browser receives 6,140 declarative marks and reviewed static Color
+  Liquify Splash, Stars/Twinkle and Curve Current + Source Cover adapters.
+  The 1,691 stationary covers and 3,896 moving source-color fragments share
+  one bounded atlas; paths, roles, source pigments and side distances are
+  prepared once. The archive retains Function Brush source, but generated
+  runtime data does not.
 
 ## Curated Live Painting project: Van Gogh 1C
 

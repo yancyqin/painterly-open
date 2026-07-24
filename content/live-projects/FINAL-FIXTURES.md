@@ -5,7 +5,7 @@ These archives are the owner-authored visual source of truth for the single-Canv
 | Room | Repository source | Archive SHA-256 | Shell SHA-256 | Final content | Runtime status |
 | --- | --- | --- | --- | --- | --- |
 | 1A Sunflower Parlor | `van-gogh-sunflower-parlor-1a.lpp` | `3aa1db5eadb52115145a3a61a7ebbbdd67b428728477b638ca7ee2b3ef789489` | `07a8b1f37ceb1527b3139add528243d568fcdedf707c0faa525c67bc989f6388` | 626 marks, 17 strokes, 5 warps | Runtime imported; owner-approved |
-| 1B Starry Studio Curve Current | `van-gogh-starry-studio-1b.lpp` | `1b26be2478043bb57b0abd1cc0130ae2c70061061d5e3b29eb727cca9d734cd9` | `34684e067ca29b9219b00e6949463d70e5b6f7bbeab106f7f14063c708a2cbab` | 4,910 marks, 227 strokes, 0 warps | Runtime imported; owner visual/mobile approved 2026-07-24 |
+| 1B Starry Studio Source Cover | `van-gogh-starry-studio-1b.lpp` | `f5c2c632d22e80b35c2a5697af4d65c21787f57459d20e79f1a5759489bfb806` | `34684e067ca29b9219b00e6949463d70e5b6f7bbeab106f7f14063c708a2cbab` | 6,140 marks, 112 strokes, 0 warps | Runtime imported; owner visual/mobile QA pending |
 | 1C Cypress Bedroom | `van-gogh-cypress-bedroom-1c.lpp` | `c5f646b6f4bdab6a09678b277096af0b1953cc1483fb60833a816ace6843f43f` | `85f71fc3fd00b7c1436d1e38331c8f1a8c4aeff62f9807f3533137e1f05bf698` | 553 marks, 15 strokes, 2 warps | Final runtime imported; owner QA pending |
 
 All three archives use `lucas-live-painting-project` v1, `artlab-live-doc` v3, and a 960×640 stage. Their embedded shells are byte-identical to the mapped game room assets.
@@ -14,5 +14,8 @@ The pre-correction 1B archive remains unchanged at
 `final-fixtures/van-gogh-starry-studio-1b.lpp`. The corrected owner archive is
 preserved separately at
 `final-fixtures/van-gogh-starry-studio-1b-correction.lpp`.
+The owner-approved 4,910-mark Curve Current archive is preserved at
+`final-fixtures/van-gogh-starry-studio-1b-curve-current.lpp` with SHA-256
+`1b26be2478043bb57b0abd1cc0130ae2c70061061d5e3b29eb727cca9d734cd9`.
 
 The `.lpp` files are editable/audit sources and may contain Function Brush source. Browser builds must receive only importer-generated declarative data and explicitly reviewed static adapters.

@@ -4,7 +4,7 @@ import {
   type CuratedLiveProject,
 } from "./game/curatedLivePainting";
 
-type BenchMode = "base" | "splash" | "stars" | "breakout" | "curve" | "full";
+type BenchMode = "base" | "splash" | "stars" | "cover" | "curve" | "full";
 
 const ROOM_WIDTH = 960;
 const ROOM_HEIGHT = 640;
@@ -41,7 +41,7 @@ async function loadProject(): Promise<CuratedLiveProject> {
   if (project.id !== "van-gogh-starry-studio-1b"
     || project.canvas.width !== ROOM_WIDTH
     || project.canvas.height !== ROOM_HEIGHT
-    || project.stats.marks !== 4910) {
+    || project.stats.marks !== 6140) {
     throw new Error("Final 1B runtime data does not match its reviewed contract");
   }
   return project;
@@ -82,11 +82,23 @@ function stages(): CuratedLiveDrawStages | undefined {
   if (mode === "stars") {
     return { warpFieldLimit: 0, markKinds: ["twinkle"], markLimit, atlasSoftMarks: true };
   }
-  if (mode === "breakout") {
-    return { warpFieldLimit: 0, markKinds: ["color-liquify-breakout"], markLimit, atlasSoftMarks: true };
+  if (mode === "cover") {
+    return {
+      warpFieldLimit: 0,
+      markKinds: ["curve-current"],
+      curveRole: "cover",
+      markLimit,
+      atlasSoftMarks: true,
+    };
   }
   if (mode === "curve") {
-    return { warpFieldLimit: 0, markKinds: ["curve-current"], markLimit, atlasSoftMarks: true };
+    return {
+      warpFieldLimit: 0,
+      markKinds: ["curve-current"],
+      curveRole: "moving",
+      markLimit,
+      atlasSoftMarks: true,
+    };
   }
   return { markLimit, atlasSoftMarks: true };
 }

@@ -1,7 +1,7 @@
 # Painterly Chameleon 单一 Canvas 分阶段迁移计划
 
-状态：1A production 已通过；1B correction 与 1C 等待 owner QA；6A Liquid 已锁定逐 mark ring-mask/scratch composite 路径  
-日期：2026-07-23
+状态：1A/1C production 已通过；1B Source Cover 已导入并等待真机闸门；6A avatar/room 已通过
+日期：2026-07-24
 
 执行状态：
 
@@ -30,6 +30,7 @@
 - Final LPP #12 owner 复测：1B 的 BASE / SPLASH / STARS / GALAXY / FULL ATLAS 全部丝滑，1B production 通过；1C final 仍保留视觉 QA；
 - 1B correction #13：owner 新档保持同一 shell，更新为 1,233 marks/88 strokes/0 warps；Galaxy 改为两种 directional Breakout，使用两条完整 SHA-256 静态 adapter 并继续走 shared atlas。旧 1B 验收结果保留为历史证据，correction 重新等待 owner QA；
 - 1B Curve Current #14：owner 新档仍匹配 v6a shell，更新为 4,910 marks/227 strokes/0 warps；三个新 revision 的 3,801 个柔化 streaks 在 prepare 阶段重建路径/起点并进入同一 atlas。`live-1b` 新增 CURVE CURRENT additive tab 和 4,910 单一数量滑杆。路径只能在 archive 保留的可见 mark cohorts 间插值；owner 于 2026-07-24 真机确认视觉没有问题且移动很流畅，production 通过；
+- 1B Source Cover #15：owner 新档继续匹配 v6a shell，更新为 6,140 marks/112 strokes/0 warps；三个新 revision 共 1,691 cover + 3,896 moving fragments。prepare 用每个 cohort 首枚 cover 的真实手势点重建路径并预计算 role/起点/顺序/侧距，7,034 cells 共用一张 2,688×2,688 atlas；`live-1b` 把已退出项目的 Breakout tab 换成 SOURCE COVER / MOVING CURRENT 两档和 6,140 单一数量滑杆。上一版已通过 archive 独立保留；新版等待 owner 视觉与手机移动闸门；
 - Live avatar #11 owner 复测：20 Liquid marks 丝滑；高数量 `RE-LAY ONLY` 与 `FULL` 卡；原 `EROSION ONLY` 因龙被重叠 erosion 完全擦掉，无法形成有效视觉/拖动结论。下一轮给 Erosion 加不计时的淡参考龙，并增加同 mask/`source-in`、但只做 bounded solid fill 的 `TINT RE-LAY`；
 - Live avatar #11 第二轮：owner 确认高 mark 数的 `TINT RE-LAY` 与带参考龙的 `EROSION ONLY` 都卡；因此排除“只有 transformed full-source pigment draw 才是瓶颈”，两档共同的逐 mark organic ring mask、scratch composite 与 bounded blit 是下一轮应批处理/atlas 化的路径；
 - Seeker Close Look 复盘：完全关闭 Close Look 后 Seeker 仍卡，已排除它是主因并恢复；`Space` / `R` inspect 快捷键及同卡提示一并恢复；
@@ -81,10 +82,10 @@
 
 2026-07-23 已用登记的 archives 生成三个 runtime；pre-correction 1B 的五档 additive benchmark 已获 owner 真机通过，但 correction 与 final 1C 的视觉仍须 owner 明确通过，不能把自动检查当成批准。
 
-2026-07-24 的当前 1B Curve Current 为 4,910 marks、227 strokes、0 warps；
-archive SHA-256 `1b26be2478043bb57b0abd1cc0130ae2c70061061d5e3b29eb727cca9d734cd9`。
-旧 final/correction fixtures 继续作为历史审计源；新高数量 Curve Current
-版本已由 owner 独立完成真机视觉和移动流畅度验收。
+2026-07-24 的当前 1B Source Cover 为 6,140 marks、112 strokes、0 warps；
+archive SHA-256 `f5c2c632d22e80b35c2a5697af4d65c21787f57459d20e79f1a5759489bfb806`。
+旧 final/correction 与已通过的 4,910-mark Curve Current fixtures 继续作为历史审计源；
+当前 Source Cover 版本等待 owner 独立完成真机视觉和移动流畅度验收。
 
 ### 主游戏初始盘点（历史基线）
 

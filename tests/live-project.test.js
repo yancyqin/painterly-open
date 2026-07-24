@@ -63,16 +63,16 @@ test("1C curated Live Painting asset stays bounded and source-free", () => {
   }
 });
 
-test("1B owner-approved Curve Current stays explicitly bounded and source-free", () => {
+test("1B Source Cover stays explicitly bounded and source-free", () => {
   assert.equal(starryProject.format, "painterly-curated-live-project");
   assert.equal(starryProject.version, 1);
   assert.equal(starryProject.artHouse, "van-gogh-house");
   assert.equal(starryProject.roomIndex, 1);
   assert.equal(starryProject.baseSurface, 0);
-  assert.deepEqual(starryProject.stats, { marks: 4910, strokes: 227, warpFields: 0 });
+  assert.deepEqual(starryProject.stats, { marks: 6140, strokes: 112, warpFields: 0 });
   assert.equal(
     starryProject.source.lppSha256,
-    "sha256:1b26be2478043bb57b0abd1cc0130ae2c70061061d5e3b29eb727cca9d734cd9",
+    "sha256:f5c2c632d22e80b35c2a5697af4d65c21787f57459d20e79f1a5759489bfb806",
   );
   assert.equal(
     starryProject.source.sha256,
@@ -82,34 +82,64 @@ test("1B owner-approved Curve Current stays explicitly bounded and source-free",
   const kinds = Object.values(starryProject.adapters).map(adapter => adapter.kind);
   assert.equal(kinds.filter(kind => kind === "twinkle").length, 4);
   assert.equal(kinds.filter(kind => kind === "color-liquify-splash").length, 14);
-  assert.equal(kinds.filter(kind => kind === "color-liquify-breakout").length, 2);
   assert.equal(kinds.filter(kind => kind === "curve-current").length, 3);
+  assert.equal(kinds.filter(kind => kind === "color-liquify-breakout").length, 0);
   assert.equal(kinds.filter(kind => kind === "galaxy").length, 0);
   assert.deepEqual(
-    starryProject.adapters["sha256:36cb21d7a2dca0befd24c387d7930991daefa7dc71a72f9bf59841ceaec17d7a"],
-    { kind: "color-liquify-breakout", speed: 10, size: 11, travel: 10, lives: 2.8 },
-  );
-  for (const revision of [
-    "sha256:a8702e96aacda345e971d203b34c689d0bb404960425eb6d1abc4f23b413230d",
-    "sha256:6de17a7cd51904f7056d233d0d65232b176212bdf68efe9a1f1434f8333553c7",
-    "sha256:2c730ba29858619f259549bc01c79540ed515ff7b9004c8ba3339daaaaa111cd",
-  ]) {
-    assert.deepEqual(starryProject.adapters[revision], {
+    starryProject.adapters["sha256:49ebf0e7396970792b9ae961f2ddb653cccd1bb53dae42e77e9919c5dceaa3e3"],
+    {
       kind: "curve-current",
-      speed: 17,
-      flow: 3,
+      speed: 50,
+      flow: 2,
       startStagger: .38,
       activeWindow: .55,
       arriveAt: .78,
       wobble: 4,
-      photoOpacity: 78,
+      photoOpacity: 65,
       photoBlur: 7,
-    });
-  }
-  assert.deepEqual(
-    starryProject.adapters["sha256:d1e72b3f6e17396bb4d6f0eedd4a119e688677e289f09ba7683f565c30a79e88"],
-    { kind: "color-liquify-breakout", speed: 10, size: 7, travel: 10, lives: 2.8 },
+      cover: {
+        lead: .07,
+        restore: .12,
+        finalPause: .04,
+        red: 12,
+        green: 52,
+        blue: 94,
+        opacity: .96,
+      },
+    },
   );
+  assert.deepEqual(
+    starryProject.adapters["sha256:0c1a4a780ced6a386ede7d4f4481e7eb04c48d524934b17935ef6913a6f51cb0"].cover,
+    {
+      lead: .07,
+      restore: .12,
+      finalPause: .04,
+      red: 7,
+      green: 54,
+      blue: 102,
+      opacity: .96,
+    },
+  );
+  assert.deepEqual(
+    starryProject.adapters["sha256:d0901e44ff29a8ceb32cdfabab8fe098db3734d98ce2775fb0daff24f7ed06b1"].cover,
+    {
+      lead: .07,
+      restore: .12,
+      finalPause: .04,
+      red: 125,
+      green: 100,
+      blue: 42,
+      opacity: .76,
+      startFade: .12,
+      endFade: .12,
+    },
+  );
+  const sourceCoverMarks = starryProject.layers
+    .flatMap(layer => layer.strokes)
+    .filter(stroke => starryProject.adapters[stroke.brushRevision]?.cover)
+    .flatMap(stroke => stroke.marks);
+  assert.equal(sourceCoverMarks.length, 5587);
+  assert.equal(sourceCoverMarks.filter(mark => mark.angle < -10).length, 1691);
   assert.equal(JSON.stringify(starryProject).includes("function brush"), false);
   assert.equal(JSON.stringify(starryProject).includes("function move"), false);
 });

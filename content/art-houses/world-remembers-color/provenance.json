@@ -1,0 +1,51 @@
+{
+  "art_house_id": "world-remembers-color",
+  "content_version": 2,
+  "release_status": "prototype",
+  "commercial_use": "approved",
+  "source_repository": "snake-lab",
+  "source_commit": "f74595c3ce6e3c970b1e407679d11acdc92b1f31",
+  "migration_date": "2026-07-18",
+  "asset_inventory": {
+    "room_backgrounds": {
+      "count": 3,
+      "path": "src/game/assets/rooms/color-rebirth/*-shell-v1.jpg",
+      "creation_method": "OpenAI image generation with project-owned geometry references",
+      "modifications": "geometry-locked selection, final cleanup edits, resize and JPEG encoding",
+      "runtime_selection": "the three V1 plates",
+      "details": "src/game/assets/CREDITS.md"
+    },
+    "prop_sprites": {
+      "count": 58,
+      "path": "src/game/assets/props/color-rebirth/*.png",
+      "creation_method": "OpenAI image generation/editing and deterministic paint variants",
+      "modifications": "chroma removal, alpha cleanup, crop, resize and variant review",
+      "runtime_selection": "16 final layout instances; available V1/V2/V3 workstation artwork is selected deterministically by challenge seed",
+      "details": "src/game/assets/CREDITS.md"
+    },
+    "layout": {
+      "count": 1,
+      "path": "src/game/assets/layouts/color-rebirth-layout-0.json",
+      "creation_method": "Editor-authored room layout, floor, portal, spawn and collision contract",
+      "modifications": "copied byte-for-byte from the recorded source commit"
+    }
+  },
+  "underlying_work": {
+    "artist_reference": "contemporary original ink-wash, seasonal garden and painted-canvas visual language",
+    "specific_museum_scan_embedded": false,
+    "claim": "newly composed game art; no specific historical painting or museum scan intentionally embedded",
+    "review_required": true
+  },
+  "human_author_contribution": "Art direction, prompts, geometry constraints, asset selection, sprite cleanup, layout authorship, collision tuning, variant review and runtime composition; requires formal documentation review.",
+  "license_or_terms_snapshot": null,
+  "source_url": null,
+  "reviewer": "Yanxiang Qin",
+  "reviewed_at": 1784533027,
+  "blocking_checks": [
+    "Verify every generated source ID and each geometry/reference-image permission",
+    "Document human-authored modifications per production asset",
+    "Run similarity review against specific paintings, artists and competing games",
+    "Review art-house naming, endorsement implication and Painterly Chameleon trademark",
+    "Approve public commercial use or replace blocked assets"
+  ]
+}

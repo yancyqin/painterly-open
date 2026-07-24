@@ -1,0 +1,51 @@
+{
+  "art_house_id": "luminous-tide-dreamscape",
+  "content_version": 1,
+  "release_status": "prototype",
+  "commercial_use": "approved",
+  "source_repository": "snake-lab",
+  "source_commit": "755206b894a0702d61a81743abd09ae5f403b809",
+  "migration_date": "2026-07-19",
+  "asset_inventory": {
+    "room_backgrounds": {
+      "count": 3,
+      "path": "src/game/assets/rooms/luminous-tide/*-shell-v1.jpg",
+      "creation_method": "Project-owned OpenAI ImageGen workflows for Moon-Tide Garden and Nebula Islands; accepted user-supplied project concept raster for River of Dream Islands",
+      "modifications": "furniture cleanup, geometry-locked final selection, resize and JPEG encoding",
+      "runtime_selection": "the three V1 plates",
+      "details": "src/game/assets/CREDITS.md"
+    },
+    "prop_sprites": {
+      "count": 18,
+      "path": "src/game/assets/props/luminous-tide/*.png",
+      "creation_method": "OpenAI ImageGen and project-owned chroma-removal, alpha-cleanup and variant-review workflow",
+      "modifications": "six independently composed props, each with V1/V2/V3 skins on a shared geometry canvas",
+      "runtime_selection": "six final layout instances select a deterministic V1/V2/V3 skin by challenge seed",
+      "details": "src/game/assets/CREDITS.md"
+    },
+    "layout": {
+      "count": 1,
+      "path": "src/game/assets/layouts/luminous-tide-layout-0.json",
+      "creation_method": "Editor-authored room layout, floor, polygon portal, spawn and irregular collision contract",
+      "modifications": "copied byte-for-byte from the recorded source commit"
+    }
+  },
+  "underlying_work": {
+    "artist_reference": "contemporary original moonlit water, garden and nebula visual language",
+    "specific_museum_scan_embedded": false,
+    "claim": "newly composed project game art; no specific historical painting or museum scan intentionally embedded",
+    "review_required": true
+  },
+  "human_author_contribution": "Art direction, prompts, concept selection, geometry constraints, cleanup decisions, sprite crop and alpha review, layout authorship, polygon collision tuning, variant review and runtime composition; requires formal documentation review.",
+  "license_or_terms_snapshot": null,
+  "source_url": null,
+  "reviewer": "Yanxiang Qin",
+  "reviewed_at": 1784533027,
+  "blocking_checks": [
+    "Verify every generated source ID, the user-supplied concept raster's rights, and each geometry/reference-image permission",
+    "Document human-authored modifications per production asset",
+    "Run similarity review against specific paintings, artists and competing games",
+    "Review art-house naming, endorsement implication and Painterly Chameleon trademark",
+    "Approve public commercial use or replace blocked assets"
+  ]
+}

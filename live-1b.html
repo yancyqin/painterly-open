@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#0d1120">
+    <meta name="description" content="Additive mobile benchmark for the owner-final 1B Live Painting room.">
+    <title>1B Final Live Painting Test · Painterly Chameleon</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/src/live1b.css">
+    <script type="module" src="/src/live1b.ts"></script>
+  </head>
+  <body>
+    <main class="bench">
+      <header class="bench-header">
+        <div>
+          <p class="eyebrow">owner-final additive test</p>
+          <h1>1B · Starry Studio</h1>
+        </div>
+        <a href="/">back to game</a>
+      </header>
+
+      <section class="bench-controls" aria-label="1B renderer stages">
+        <div class="bench-tabs" role="tablist" aria-label="Rendered effect">
+          <button type="button" role="tab" data-bench-mode="base" aria-selected="false">base</button>
+          <button type="button" role="tab" data-bench-mode="splash" aria-selected="false">splash</button>
+          <button type="button" role="tab" data-bench-mode="stars" aria-selected="false">stars</button>
+          <button type="button" role="tab" data-bench-mode="breakout" aria-selected="false">breakout</button>
+          <button class="is-active" type="button" role="tab" data-bench-mode="full" aria-selected="true">full atlas</button>
+        </div>
+        <label class="mark-control" for="bench-mark-limit">
+          <span>marks</span>
+          <input id="bench-mark-limit" type="range" min="0" max="1233" step="50" value="1233">
+          <output id="bench-mark-value" for="bench-mark-limit">1233</output>
+        </label>
+      </section>
+
+      <section class="canvas-card">
+        <canvas id="bench-canvas" width="960" height="640" aria-label="1B final Live Painting with a draggable chameleon"></canvas>
+        <p class="drag-note">drag the chameleon</p>
+        <div id="bench-loading" class="bench-loading" aria-live="polite">loading final 1B…</div>
+      </section>
+
+      <output id="bench-metrics" class="bench-metrics" aria-live="polite">warming up…</output>
+      <p class="bench-note">All effect tabs use the production shared atlas. Mobile visual and movement smoothness require owner approval.</p>
+    </main>
+  </body>
+</html>

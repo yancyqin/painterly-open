@@ -1,0 +1,51 @@
+{
+  "art_house_id": "outdoor-masters-journey",
+  "content_version": 2,
+  "release_status": "prototype",
+  "commercial_use": "approved",
+  "source_repository": "snake-lab",
+  "source_commit": "06c9790",
+  "migration_date": "2026-07-23",
+  "asset_inventory": {
+    "room_backgrounds": {
+      "count": 6,
+      "path": "src/game/assets/rooms/outdoor-triptych/*-shell-v[12].jpg",
+      "creation_method": "OpenAI image generation with project-owned geometry references",
+      "modifications": "geometry-locked selection, natural-boundary v2 edits, resize and JPEG encoding",
+      "runtime_selection": "the three v2 plates",
+      "details": "src/game/assets/CREDITS.md"
+    },
+    "prop_sprites": {
+      "count": 49,
+      "path": "src/game/assets/props/outdoor-triptych/*.png",
+      "creation_method": "OpenAI image generation/editing and deterministic color-managed variants",
+      "modifications": "chroma removal, alpha cleanup, edge treatment, crop, resize and variant review",
+      "runtime_selection": "13 layout-authored objects; variants are selected deterministically by challenge seed",
+      "details": "src/game/assets/CREDITS.md"
+    },
+    "layout": {
+      "count": 1,
+      "path": "src/game/assets/layouts/outdoor-triptych-layout-0.json",
+      "creation_method": "Editor-authored room layout, floor, collision and portal contract",
+      "modifications": "copied byte-for-byte from the recorded source commit after the owner-authored 3C doorway and floor correction"
+    }
+  },
+  "underlying_work": {
+    "artist_reference": "broad Van Gogh-, Monet- and Fauvist-era visual language",
+    "specific_museum_scan_embedded": false,
+    "claim": "newly composed outdoor game art; no specific historical painting or museum scan intentionally embedded",
+    "review_required": true
+  },
+  "human_author_contribution": "Art direction, prompts, geometry constraints, asset selection, sprite cleanup, layout authorship, collision tuning, variant review and runtime composition; requires formal documentation review.",
+  "license_or_terms_snapshot": null,
+  "source_url": null,
+  "reviewer": "Yanxiang Qin",
+  "reviewed_at": 1784533027,
+  "blocking_checks": [
+    "Verify every generated source ID and each geometry/reference-image permission",
+    "Document human-authored modifications per production asset",
+    "Run similarity review against specific paintings, artists and competing games",
+    "Review historical-style naming, endorsement implication and Painterly Chameleon trademark",
+    "Approve public commercial use or replace blocked assets"
+  ]
+}

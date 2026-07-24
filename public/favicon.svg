@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Painterly Chameleon paint palette">
+  <rect width="64" height="64" rx="16" fill="#171b2c"/>
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="none" stroke="#d8b866" stroke-opacity=".7" stroke-width="2"/>
+  <path d="M11 34c0-13 10-23 24-23 11 0 20 7 20 16 0 7-5 11-11 11h-4c-4 0-6 2-6 6 0 6-4 9-10 9-8 0-13-8-13-19Z" fill="#eadbb9"/>
+  <circle cx="45" cy="27" r="5.2" fill="#171b2c"/>
+  <circle cx="22" cy="27" r="4.2" fill="#36c8c4"/>
+  <circle cx="31" cy="20" r="4.2" fill="#efc862"/>
+  <circle cx="41" cy="19" r="4.2" fill="#ef806f"/>
+  <circle cx="21" cy="38" r="4.2" fill="#a98bea"/>
+  <circle cx="29" cy="34" r="4.2" fill="#5d8fcb"/>
+</svg>

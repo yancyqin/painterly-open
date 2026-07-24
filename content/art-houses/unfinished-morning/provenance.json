@@ -1,0 +1,68 @@
+{
+  "art_house_id": "unfinished-morning",
+  "content_version": 1,
+  "release_status": "prototype",
+  "commercial_use": "approved",
+  "source_repository": "snake-lab",
+  "source_commit": "bc48256f6b8ec23569ce9bb70049c672b3f31a12",
+  "migration_date": "2026-07-19",
+  "asset_inventory": {
+    "room_backgrounds": {
+      "count": 9,
+      "path": "src/game/assets/rooms/unfinished-morning/*-shell-v{1,2,3}.jpg",
+      "creation_method": "Project-owned OpenAI ImageGen workflows; original humanist/handscroll synthesis on a fixed 960x640 three-quarter game camera",
+      "modifications": "baked-prop removal, exact-scene color-boundary repaints per variant, geometry-locked selection, resize and JPEG encoding; 6A v1/v2 file contents were exchanged so its donor-matched study is consistently named v1",
+      "runtime_selection": "surface seed picks one of the three background studies per room",
+      "details": "src/game/assets/CREDITS.md"
+    },
+    "runtime_live_backgrounds": {
+      "count": 3,
+      "path": "src/game/assets/rooms/unfinished-morning/donors/*-owner-donor-*.jpg (superseded donor experiments remain for provenance)",
+      "creation_method": "Three 960x640 owner-edited JPEG donor plates supplied as 2.jpg for 6A, 1.jpg for 6B and 6cnew.jpg for 6C",
+      "modifications": "copied byte-for-byte into versioned runtime paths; all white and near-white pixels are strictly excluded from the animated layer and a pure-transparent gutter surrounds each white edge; runtime computes one full-screen boundary-distance field per logical white region and advances an independently phased, very soft alpha annulus to the screen edges before fading it away; all wave cycles are 20% slower than the preceding preset; 6C directly uses the owner's seven disconnected white decision regions without clustering",
+      "runtime_selection": "one room-specific donor is decoded for a Live challenge and alpha-composited over fixed shell v1 in all three rooms; non-Live challenges retain normal surface selection",
+      "details": "src/game/assets/CREDITS.md"
+    },
+    "runtime_effect_textures": {
+      "count": 1,
+      "path": "src/game/assets/rooms/unfinished-morning/effects/unfinished-morning-fog-density-v1.png",
+      "creation_method": "OpenAI ImageGen monochrome fog density source on black",
+      "modifications": "downsampled to 512x341 PNG; black is converted to alpha once after image decode",
+      "runtime_selection": "disabled in every formal game room and retained for provenance only; GameCanvas neither requests nor draws white fog",
+      "details": "src/game/assets/CREDITS.md"
+    },
+    "prop_sprites": {
+      "count": 14,
+      "path": "src/game/assets/props/unfinished-morning/*.png",
+      "creation_method": "OpenAI ImageGen on chroma plates plus project-owned chroma-removal, alpha-crop and variant-review workflow",
+      "modifications": "four humanist figure groups with reviewed V1/V2/V3 skins (rejected studies intentionally copy V1) and two 6C garden anchors separated from the shell",
+      "runtime_selection": "six layout instances select a deterministic V1/V2/V3 skin by challenge seed; missing variants fall back to V1",
+      "details": "src/game/assets/CREDITS.md"
+    },
+    "layout": {
+      "count": 1,
+      "path": "src/game/assets/layouts/unfinished-morning-layout-0.json",
+      "creation_method": "Editor-authored room layout, floor, portal, spawn, per-instance collision-pad and irregular collision contract",
+      "modifications": "copied byte-for-byte from the recorded source commit"
+    }
+  },
+  "underlying_work": {
+    "artist_reference": "Humanist-dome room deliberately adapts the COMPOSITION of two public-domain masterworks — Michelangelo's Creation of Adam (Sistine Chapel, 1512) and Raphael's School of Athens (1511): the reaching-hands figures and the coffered domed architecture. Handscroll room is original blue-green (qinglu) landscape synthesis, not a copy of any one specific scroll (its red seal is a decorative invented mark, not a reproduced artist's seal). Blank-canvas room is original.",
+    "specific_museum_scan_embedded": false,
+    "public_domain_basis": "Michelangelo d.1564 and Raphael d.1520 — works long in the public domain; composition and style of public-domain works are freely reusable. Assets are project-drawn re-renderings (own OpenAI ImageGen), NOT photographic reproductions, so no photographer's copyright attaches.",
+    "claim": "Newly drawn project game art. The humanist-dome room is an intentional, acknowledged homage to the above public-domain compositions; no modern/copyrighted image and no museum scan is embedded.",
+    "review_required": false
+  },
+  "human_author_contribution": "Art direction, prompts, concept selection, geometry constraints, baked-prop removal decisions, sprite crop and alpha review, figure-variant acceptance/rejection, layout authorship, collision tuning and runtime composition; requires formal documentation review.",
+  "license_or_terms_snapshot": null,
+  "source_url": null,
+  "reviewer": "Yanxiang Qin",
+  "reviewed_at": 1784533027,
+  "blocking_checks": [
+    "Verify every generated source ID and each geometry/reference-image permission",
+    "Document human-authored modifications per production asset",
+    "Run similarity review against specific paintings, artists and competing games (esp. School of Athens / Sistine gesture references)",
+    "Review art-house naming, endorsement implication and Painterly Chameleon trademark",
+    "Approve public commercial use or replace blocked assets"
+  ]
+}

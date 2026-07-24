@@ -1,0 +1,367 @@
+{
+  "format": "chameleon-room-layout@1",
+  "roomId": "van-gogh-house",
+  "layoutVariant": 0,
+  "props": [
+    {
+      "id": "vg-bedroom-cabinet",
+      "modelId": "painted-cabinet",
+      "x": 2710,
+      "y": 340,
+      "rotation": 0,
+      "accent": 1
+    },
+    {
+      "id": "vg-bedroom-chair",
+      "modelId": "rattan-armchair",
+      "x": 2544,
+      "y": 400,
+      "rotation": 180,
+      "accent": 0
+    },
+    {
+      "id": "vg-bedroom-cypress",
+      "modelId": "cypress-plant-stand",
+      "x": 2790,
+      "y": 435,
+      "rotation": 0,
+      "accent": 2
+    },
+    {
+      "id": "vg-bedroom-daybed",
+      "modelId": "blue-sofa",
+      "x": 2350,
+      "y": 340,
+      "rotation": 0,
+      "accent": 1
+    },
+    {
+      "id": "vg-bedroom-lamp",
+      "modelId": "standing-lamp-gold",
+      "x": 2608,
+      "y": 412.3,
+      "rotation": 0,
+      "accent": 1
+    },
+    {
+      "id": "vg-bedroom-side-table",
+      "modelId": "round-pedestal-table",
+      "x": 2480,
+      "y": 432,
+      "rotation": 0,
+      "accent": 2,
+      "depthBias": -30
+    },
+    {
+      "id": "vg-bedroom-vase",
+      "modelId": "sunflower-vase",
+      "x": 2482.5,
+      "y": 366.3,
+      "rotation": 0,
+      "accent": 0,
+      "collision": {
+        "padLeft": -100,
+        "padRight": 0,
+        "padFront": 0,
+        "padBack": 0
+      },
+      "depthBias": 40
+    },
+    {
+      "id": "vg-parlor-chair",
+      "modelId": "rattan-armchair",
+      "x": 456,
+      "y": 408,
+      "rotation": 180,
+      "accent": 2
+    },
+    {
+      "id": "vg-parlor-lamp",
+      "modelId": "standing-lamp-gold",
+      "x": 642.5,
+      "y": 511.4,
+      "rotation": 0,
+      "accent": 2
+    },
+    {
+      "id": "vg-parlor-sofa",
+      "modelId": "blue-sofa",
+      "x": 280,
+      "y": 400,
+      "rotation": 180,
+      "accent": 0
+    },
+    {
+      "id": "vg-parlor-sunflowers",
+      "modelId": "sunflower-vase",
+      "x": 176,
+      "y": 416,
+      "rotation": 0,
+      "accent": 1
+    },
+    {
+      "id": "vg-parlor-table",
+      "modelId": "round-pedestal-table",
+      "x": 360,
+      "y": 440,
+      "rotation": 0,
+      "accent": 1
+    },
+    {
+      "id": "vg-parlor-writing-chair",
+      "modelId": "chair-oak",
+      "x": 577.2,
+      "y": 539.5,
+      "rotation": 0,
+      "accent": 0
+    },
+    {
+      "id": "vg-parlor-writing-chair-copy",
+      "modelId": "chair-oak",
+      "x": 1664,
+      "y": 432,
+      "rotation": 180,
+      "accent": 0
+    },
+    {
+      "id": "vg-parlor-writing-table",
+      "modelId": "atelier-table",
+      "x": 595.9,
+      "y": 557.3,
+      "rotation": 180,
+      "accent": 1
+    },
+    {
+      "id": "vg-studio-brushes",
+      "modelId": "tall-brush-jar",
+      "x": 1392,
+      "y": 456,
+      "rotation": 0,
+      "accent": 1
+    },
+    {
+      "id": "vg-studio-cabinet",
+      "modelId": "painted-cabinet",
+      "x": 121.6,
+      "y": 599.3,
+      "rotation": 0,
+      "accent": 0
+    },
+    {
+      "id": "vg-studio-canvases",
+      "modelId": "canvas-stack",
+      "x": 1144,
+      "y": 432,
+      "rotation": 0,
+      "accent": 0
+    },
+    {
+      "id": "vg-studio-crate",
+      "modelId": "painter-crate",
+      "x": 1520.1,
+      "y": 533.4,
+      "rotation": 0,
+      "accent": 1
+    },
+    {
+      "id": "vg-studio-easel-left",
+      "modelId": "tripod-easel",
+      "x": 1584,
+      "y": 480,
+      "rotation": 180,
+      "accent": 2
+    },
+    {
+      "id": "vg-studio-easel-right",
+      "modelId": "tripod-easel",
+      "x": 1296,
+      "y": 488,
+      "rotation": 0,
+      "accent": 1
+    },
+    {
+      "id": "vg-studio-paint",
+      "modelId": "spilled-paint-kit",
+      "x": 1673.9,
+      "y": 545.4,
+      "rotation": 0,
+      "accent": 2
+    },
+    {
+      "id": "vg-studio-papers",
+      "modelId": "crumpled-sketches",
+      "x": 1580,
+      "y": 525,
+      "rotation": 0,
+      "accent": 0
+    },
+    {
+      "id": "vg-studio-rug",
+      "modelId": "paint-splashed-rug",
+      "x": 1460,
+      "y": 485,
+      "rotation": 0,
+      "accent": 2
+    },
+    {
+      "id": "vg-studio-stool",
+      "modelId": "round-stool",
+      "x": 1346.8,
+      "y": 550.8,
+      "rotation": 0,
+      "accent": 0
+    },
+    {
+      "id": "vg-studio-table",
+      "modelId": "atelier-table",
+      "x": 1477.9,
+      "y": 381.8,
+      "rotation": 180,
+      "accent": 1,
+      "depthBias": -10
+    },
+    {
+      "id": "vg-studio-vase",
+      "modelId": "sunflower-vase",
+      "x": 1443.2,
+      "y": 313.2,
+      "rotation": 0,
+      "accent": 0,
+      "collision": {
+        "padLeft": -100,
+        "padRight": 0,
+        "padFront": 0,
+        "padBack": 0
+      },
+      "depthBias": 60
+    }
+  ],
+  "portals": [
+    {
+      "id": "parlor-studio",
+      "leftEntry": {
+        "x": 776,
+        "y": 200,
+        "w": 122,
+        "h": 220
+      },
+      "rightEntry": {
+        "x": 1000,
+        "y": 176,
+        "w": 166,
+        "h": 228
+      },
+      "leftExit": {
+        "x": 768,
+        "y": 392
+      },
+      "rightExit": {
+        "x": 1184,
+        "y": 360
+      }
+    },
+    {
+      "id": "studio-bedroom",
+      "leftEntry": {
+        "x": 1720,
+        "y": 152,
+        "w": 132,
+        "h": 224
+      },
+      "rightEntry": {
+        "x": 1936,
+        "y": 192,
+        "w": 204,
+        "h": 220
+      },
+      "leftExit": {
+        "x": 1720,
+        "y": 360
+      },
+      "rightExit": {
+        "x": 2144,
+        "y": 400
+      }
+    }
+  ],
+  "floor": [
+    [
+      {
+        "x": 210,
+        "y": 204
+      },
+      {
+        "x": 688,
+        "y": 204
+      },
+      {
+        "x": 928,
+        "y": 472
+      },
+      {
+        "x": 864,
+        "y": 600
+      },
+      {
+        "x": 48,
+        "y": 600
+      },
+      {
+        "x": 48,
+        "y": 350
+      }
+    ],
+    [
+      {
+        "x": 968,
+        "y": 464
+      },
+      {
+        "x": 1248,
+        "y": 216
+      },
+      {
+        "x": 1640,
+        "y": 216
+      },
+      {
+        "x": 1888,
+        "y": 448
+      },
+      {
+        "x": 1856,
+        "y": 600
+      },
+      {
+        "x": 992,
+        "y": 600
+      }
+    ],
+    [
+      {
+        "x": 1936,
+        "y": 480
+      },
+      {
+        "x": 2240,
+        "y": 248
+      },
+      {
+        "x": 2776,
+        "y": 312
+      },
+      {
+        "x": 2848,
+        "y": 504
+      },
+      {
+        "x": 2816,
+        "y": 600
+      },
+      {
+        "x": 1960,
+        "y": 600
+      }
+    ]
+  ]
+}

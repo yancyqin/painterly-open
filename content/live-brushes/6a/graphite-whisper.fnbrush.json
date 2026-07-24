@@ -1,0 +1,24 @@
+{
+  "$schema": "https://lucasacademy.org/art-lab/schemas/function-brush-v1.schema.json",
+  "format": "lucas-function-brush",
+  "version": 1,
+  "id": "graphite-whisper",
+  "name": "Graphite Whisper",
+  "revision": "sha256:da16b42451fbc89a366dafe5f2c861b6a549dab80e00bce17bead48957198e8a",
+  "source": "// Graphite Whisper — a fixed vector is progressively drawn, then erased; no jitter.\nconst FLOW = 2;\nconst SIZE = 18;\nconst FADE = 0;\nconst SPEED = 50;\nconst LINKS = 0;\nconst TERRITORY = 0;\nconst REBUILD_PHOTO = 1;\nconst PHOTO_OPACITY = 100;\nconst PHOTO_BLUR = 0;\n\nfunction ease(a, b, value) {\n  const x = Math.max(0, Math.min(1, (value - a) / (b - a)));\n  return x * x * (3 - 2 * x);\n}\n\nfunction brush(point, stroke, t) {\n  const marks = [];\n  for (let i = 0; i < FLOW; i += 1) {\n    const seed = point.index * 29 + i * 13 + stroke.seed * 83;\n    const c = photo(point.x, point.y, PHOTO_BLUR);\n    if (!c) continue;\n    marks.push({\n      x: point.x + (rand(seed) - .5) * 7,\n      y: point.y + (rand(seed + 5) - .5) * 7,\n      size: SIZE * (.7 + rand(seed + 11) * .55) * 2.2,\n      alpha: .22 * PHOTO_OPACITY / 100,\n      red: c.red, green: c.green, blue: c.blue,\n      shape: \"streak\",\n      angle: point.angle * 180 / Math.PI + (rand(seed + 19) - .5) * 18,\n      soft: .2\n    });\n  }\n  return marks;\n}\n\nfunction move(mark, t) {\n  const speed = .075 + mark.seed * .055;\n  const cycle = (t * speed + mark.seed) % 1;\n  const drawn = ease(.04, .27, cycle);\n  const erased = ease(.7, .9, cycle);\n  return {\n    dx: 0,\n    dy: 0,\n    size: Math.max(0, drawn - erased),\n    alpha: drawn > erased ? .34 : 0\n  };\n}\n",
+  "capabilities": [
+    "brush",
+    "move"
+  ],
+  "settings": {
+    "FLOW": 2,
+    "SIZE": 18,
+    "FADE": 0,
+    "SPEED": 50,
+    "LINKS": 0,
+    "TERRITORY": 0,
+    "REBUILD_PHOTO": 1,
+    "PHOTO_OPACITY": 100,
+    "PHOTO_BLUR": 0
+  }
+}

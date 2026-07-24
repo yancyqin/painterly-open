@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#161b2d">
+    <meta name="description" content="It’s hide-and-seek: paint a chameleon, hide it in art, and send the puzzle to friends.">
+    <title data-i18n="brand.name">Painterly Chameleon</title>
+    <link rel="canonical" href="https://pc.lucasacademy.org/">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Painterly Chameleon">
+    <meta property="og:title" content="Painterly Chameleon">
+    <meta property="og:description" content="Paint a chameleon, hide it in art, and send the puzzle to friends.">
+    <meta property="og:url" content="https://pc.lucasacademy.org/">
+    <meta property="og:image" content="https://pc.lucasacademy.org/og-painterly-chameleon.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Painterly Chameleon paint studio in a colorful outdoor art room">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Painterly Chameleon">
+    <meta name="twitter:description" content="Paint a chameleon, hide it in art, and send the puzzle to friends.">
+    <meta name="twitter:image" content="https://pc.lucasacademy.org/og-painterly-chameleon.jpg">
+    <script type="module" src="/src/main.ts"></script>
+  </head>
+  <body>
+    <main id="app" class="page-shell">
+      <span id="service-status" class="visually-hidden" aria-live="polite">Checking API…</span>
+
+      <section id="create-view" class="view">
+        <div class="game-stage play-stage" data-stage="hider">
+          <!-- True full-screen: the wordmark, joystick, room name (tap ↻ to
+               reshuffle), paint state, share toggle, lobby and paint are all
+               drawn on the canvas (GameCanvas). The language select floats over
+               the top-right corner. No Close Look for the hider. -->
+          <div class="play-viewport">
+            <canvas id="hider-canvas" width="960" height="640" data-i18n-aria-label="ui.hiderCanvas" aria-label="Art room with your movable chameleon — walk it to a spot, then paint and hide."></canvas>
+            <div class="canvas-loader" data-canvas-loader hidden aria-hidden="true">
+              <div class="canvas-loader-inner">
+                <svg class="canvas-loader-glyph" viewBox="0 0 512 512" focusable="false">
+                  <use href="#loader-live-chameleon"></use>
+                </svg>
+                <span class="canvas-loader-label" data-i18n="ui.painting">painting…</span>
+              </div>
+            </div>
+            <select class="locale-select canvas-locale" data-locale-select aria-label="Language"></select>
+          </div>
+          <!-- Turnstile renders here only when the bot check needs interaction
+               (interaction-only mode); it is invisible otherwise. -->
+          <div id="publish-turnstile" class="turnstile-slot turnstile-overlay" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <section id="seeker-view" class="view" hidden>
+        <div class="game-stage play-stage" data-stage="seeker">
+          <!-- True full-screen: the wordmark, joystick, Close Look, HUD, buttons
+               and overlays are all drawn on the canvas (GameCanvas). The
+               language select floats over the top-right corner. -->
+          <div class="play-viewport">
+            <canvas id="seeker-canvas" width="960" height="640" data-i18n-aria-label="ui.seekerCanvas" aria-label="Move through the art room and inspect the circle in front of your chameleon."></canvas>
+            <div class="canvas-loader" data-canvas-loader hidden aria-hidden="true">
+              <div class="canvas-loader-inner">
+                <svg class="canvas-loader-glyph" viewBox="0 0 512 512" focusable="false">
+                  <use href="#loader-live-chameleon"></use>
+                </svg>
+                <span class="canvas-loader-label" data-i18n="ui.painting">painting…</span>
+              </div>
+            </div>
+            <select class="locale-select canvas-locale" data-locale-select aria-label="Language"></select>
+          </div>
+          <!-- Report is the one small DOM overlay (like paint), opened by the
+               on-canvas Report button. -->
+          <details id="report-panel" class="safety-panel report-overlay" hidden>
+            <summary data-i18n="report.summary">report</summary>
+            <div class="safety-panel-body">
+              <div id="report-turnstile" class="turnstile-slot" aria-live="polite"></div>
+              <div class="report-actions" data-i18n-aria-label="ui.reportReason" aria-label="Report reason">
+                <button class="quiet-button" type="button" data-report-reason="not_okay" data-i18n="report.notOkay">not okay</button>
+                <button class="quiet-button" type="button" data-report-reason="broken" data-i18n="report.broken">broken</button>
+                <button class="quiet-button" type="button" data-report-reason="other" data-i18n="report.other">other</button>
+              </div>
+              <p id="report-status" class="report-status" aria-live="polite"></p>
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <section id="explore-view" class="view" hidden>
+        <div class="game-stage lobby-stage">
+          <div class="explore-toolbar">
+            <a class="wordmark" href="/" data-nav="home" data-i18n-aria-label="brand.home" aria-label="Painterly Chameleon home">
+              <span class="wordmark-mark" aria-hidden="true">◒</span>
+              <span data-i18n="brand.name">Painterly Chameleon</span>
+            </a>
+            <div class="explore-toolbar-actions">
+              <p id="explore-status" class="explore-status" aria-live="polite" data-i18n="explore.loading">loading…</p>
+              <button class="account-button" type="button" data-account-button data-i18n="auth.signIn">sign in</button>
+              <select class="locale-select" data-locale-select aria-label="Language"></select>
+            </div>
+          </div>
+          <form id="explore-search-form" class="explore-search-bar" role="search">
+            <input id="explore-search-input" type="search" maxlength="31" autocomplete="off" autocapitalize="words" spellcheck="false" data-i18n-placeholder="explore.searchPlaceholder" placeholder="find a room name">
+            <button id="explore-search-clear" type="button" hidden data-i18n-aria-label="explore.searchClear" aria-label="clear search">×</button>
+          </form>
+          <div class="art-house-shelf" aria-label="Create a challenge">
+            <button class="art-house-card" type="button" data-create-art-house="van-gogh-house">
+              <img data-art-house-thumbnail="van-gogh-house" alt="">
+              <span><strong data-i18n="house.vanGoghFull">Van Gogh House</strong><small data-i18n="explore.hideHere">hide here →</small></span>
+            </button>
+            <button class="art-house-card" type="button" data-create-art-house="monet-garden-house">
+              <img data-art-house-thumbnail="monet-garden-house" alt="">
+              <span><strong data-i18n="house.monetFull">Monet Garden House</strong><small data-i18n="explore.hideHere">hide here →</small></span>
+            </button>
+            <button class="art-house-card" type="button" data-create-art-house="outdoor-masters-journey">
+              <img data-art-house-thumbnail="outdoor-masters-journey" alt="">
+              <span><strong data-i18n="house.outdoorFull">Outdoor Masters Journey</strong><small data-i18n="explore.hideHere">hide here →</small></span>
+            </button>
+          </div>
+          <section id="explore-search-panel" class="explore-search-panel" hidden>
+            <div id="explore-search-list" class="challenge-list explore-search-list"></div>
+          </section>
+          <div class="lobby-tabs" role="tablist">
+            <button class="lobby-tab" type="button" role="tab" data-lobby-tab="tricky" data-i18n="explore.trickyTitle">sneaky</button>
+            <button class="lobby-tab" type="button" role="tab" data-lobby-tab="fresh" data-i18n="explore.freshTitle">new</button>
+            <button class="lobby-tab" type="button" role="tab" data-lobby-tab="surprise" data-i18n="explore.surpriseTitle">random</button>
+          </div>
+          <div id="explore-grid" class="explore-grid" aria-label="Public challenge collections">
+            <article class="explore-lane" data-lane="tricky">
+              <div class="lane-head">
+                <h2 data-i18n="explore.trickyTitle">sneaky</h2>
+                <button class="lane-refresh" type="button" data-lane-refresh="tricky" data-i18n-aria-label="explore.refresh" aria-label="refresh">↻</button>
+              </div>
+              <div id="explore-tricky-list" class="challenge-list"></div>
+            </article>
+            <article class="explore-lane" data-lane="fresh">
+              <div class="lane-head">
+                <h2 data-i18n="explore.freshTitle">new</h2>
+                <button class="lane-refresh" type="button" data-lane-refresh="fresh" data-i18n-aria-label="explore.refresh" aria-label="refresh">↻</button>
+              </div>
+              <div id="explore-fresh-list" class="challenge-list"></div>
+            </article>
+            <article class="explore-lane" data-lane="surprise">
+              <div class="lane-head">
+                <h2 data-i18n="explore.surpriseTitle">random</h2>
+                <button class="lane-refresh" type="button" data-lane-refresh="surprise" data-i18n-aria-label="explore.refresh" aria-label="refresh">↻</button>
+              </div>
+              <div id="explore-surprise-list" class="challenge-list"></div>
+            </article>
+          </div>
+          <div class="lobby-footer-links">
+            <a class="support-link" href="https://ko-fi.com/yancyqin" target="_blank" rel="noopener noreferrer" data-i18n="support.nextRoom">support the next room</a>
+            <a class="support-link" href="https://lucasacademy.org/painterly-chameleon#build-with-us" data-i18n="support.knowMore">know more?</a>
+          </div>
+        </div>
+      </section>
+
+      <dialog id="manage-dialog" class="manage-dialog" aria-labelledby="manage-room-name-label manage-room-name">
+        <div class="manage-card">
+          <button id="manage-close" class="auth-close" type="button" data-i18n-aria-label="ui.close" aria-label="Close">×</button>
+          <div class="manage-room-identity">
+            <p class="manage-room-line">
+              <span id="manage-room-name-label" data-i18n="manage.roomNameLabel">Room name:</span>
+              <strong id="manage-room-name" class="manage-room-name"></strong>
+            </p>
+            <small class="manage-room-hint" data-i18n="manage.searchRoomHint">Search this room name in the Lobby to find it.</small>
+          </div>
+          <small id="manage-live-badge" class="live-painting-note" data-i18n="live.badge" hidden>live painting</small>
+          <p id="manage-expiry" class="manage-status"></p>
+
+          <figure id="manage-preview" class="shot-figure" hidden>
+            <img id="manage-preview-image" class="shot-image" alt="" width="960" height="640">
+          </figure>
+
+          <div class="share-block">
+            <canvas id="manage-qr" class="share-qr" width="200" height="200" data-i18n-aria-label="ui.qrCode" aria-label="QR code linking to this hide"></canvas>
+            <div class="share-controls">
+              <label class="visually-hidden" for="share-link" data-i18n="manage.link">share link</label>
+              <div class="share-row">
+                <input id="share-link" type="url" readonly>
+                <button id="copy-button" class="icon-button" type="button" data-i18n-aria-label="manage.copy" aria-label="copy link">
+                  <span data-copy-glyph aria-hidden="true">⧉</span>
+                </button>
+              </div>
+              <button id="share-button" class="game-action-button share-cta" type="button" data-i18n="manage.shareCta">challenge a friend</button>
+            </div>
+          </div>
+
+          <div class="manage-secondary">
+            <!-- The share-on-Lobby choice lives here (moved off the play canvas):
+                 same ◉/○ radio language as the old on-canvas pill. -->
+            <button id="share-listing-toggle" class="manage-share-toggle" type="button" aria-pressed="true">
+              <span data-listing-glyph aria-hidden="true">◉</span>
+              <span data-i18n="hider.publicTitle">share</span>
+            </button>
+            <button id="delete-challenge" class="text-button text-button-danger" type="button" data-i18n="manage.delete">delete this hide</button>
+          </div>
+        </div>
+      </dialog>
+
+      <section id="admin-view" class="view" hidden>
+        <div class="stage-brand-row">
+          <a class="wordmark" href="/" data-nav="home" data-i18n-aria-label="brand.home" aria-label="Painterly Chameleon home">
+            <span class="wordmark-mark" aria-hidden="true">◒</span>
+            <span data-i18n="brand.name">Painterly Chameleon</span>
+          </a>
+          <select class="locale-select" data-locale-select aria-label="Language"></select>
+        </div>
+        <div class="hero-copy compact">
+          <p class="eyebrow">private moderation desk</p>
+          <h1>Hidden hides, one calm decision at a time.</h1>
+          <p class="lede">This page is not linked publicly. The admin token stays in this browser tab only.</p>
+        </div>
+
+        <div class="play-card admin-login-card">
+          <label class="share-label" for="admin-token">administrator token</label>
+          <div class="share-row admin-token-row">
+            <input id="admin-token" type="password" autocomplete="off" spellcheck="false">
+            <button id="load-moderation" class="primary-button" type="button">open the queue</button>
+          </div>
+          <p id="admin-status" class="report-status" aria-live="polite"></p>
+        </div>
+
+        <div class="admin-grid">
+          <section class="play-card">
+            <p class="step-label">needs a look</p>
+            <h2>Pending reports</h2>
+            <div id="moderation-queue" class="moderation-list"></div>
+          </section>
+          <section class="play-card">
+            <p class="step-label">last 30 days</p>
+            <h2>Recent decisions</h2>
+            <div id="moderation-audit" class="moderation-list"></div>
+          </section>
+        </div>
+      </section>
+
+      <section id="error-view" class="view" hidden>
+        <div class="game-stage stage-solo">
+          <div class="stage-brand-row">
+            <a class="wordmark" href="/" data-nav="home" data-i18n-aria-label="brand.home" aria-label="Painterly Chameleon home">
+              <span class="wordmark-mark" aria-hidden="true">◒</span>
+              <span data-i18n="brand.name">Painterly Chameleon</span>
+            </a>
+            <select class="locale-select" data-locale-select aria-label="Language"></select>
+          </div>
+          <div class="play-card error-card">
+            <p class="eyebrow" data-i18n="error.eyebrow">hmm… this frame is empty</p>
+            <h1 id="error-title" data-i18n="error.title">That hide isn’t here anymore.</h1>
+            <p id="error-message" class="lede"></p>
+            <a class="primary-button link-button" href="/" data-nav="home" data-i18n="error.create">make a new one →</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <dialog id="auth-dialog" class="auth-dialog" aria-labelledby="auth-title">
+      <div class="auth-card">
+        <button id="auth-close" class="auth-close" type="button" data-i18n-aria-label="ui.close" aria-label="Close">×</button>
+        <div id="auth-signed-out">
+          <h2 id="auth-title" data-i18n="auth.title">one quick grown-up check</h2>
+          <p data-i18n="auth.note">A six-digit email code. No password.</p>
+          <form id="auth-email-form">
+            <label class="visually-hidden" for="auth-email" data-i18n="auth.email">grown-up email</label>
+            <input id="auth-email" type="email" inputmode="email" autocomplete="email" required data-i18n-placeholder="auth.email" placeholder="grown-up email">
+            <div id="auth-turnstile" class="turnstile-slot" aria-live="polite"></div>
+            <button id="auth-send" class="primary-button" type="submit" data-i18n="auth.send">send code</button>
+          </form>
+          <form id="auth-code-form" hidden>
+            <label class="visually-hidden" for="auth-code" data-i18n="auth.code">six-digit code</label>
+            <input id="auth-code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required data-i18n-placeholder="auth.code" placeholder="six-digit code">
+            <button id="auth-verify" class="primary-button" type="submit" data-i18n="auth.verify">let me in</button>
+            <button id="auth-again" class="quiet-button" type="button" data-i18n="auth.again">use another email</button>
+          </form>
+          <p id="auth-status" class="auth-status" aria-live="polite"></p>
+        </div>
+        <div id="auth-signed-in" hidden>
+          <h2 data-i18n="auth.ready">you’re in</h2>
+          <p id="auth-account-email"></p>
+          <section class="account-rooms">
+            <h3 class="account-rooms-title" data-i18n="account.rooms">my rooms</h3>
+            <div id="account-rooms-list" class="account-rooms-list" aria-live="polite"></div>
+          </section>
+          <button id="auth-continue" class="primary-button" type="button" data-i18n="auth.continue">keep painting</button>
+          <button id="auth-logout" class="quiet-button" type="button" data-i18n="auth.logout">sign out</button>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog id="unlock-dialog" class="auth-dialog" aria-labelledby="unlock-title">
+      <div class="auth-card unlock-card">
+        <button id="unlock-close" class="auth-close" type="button" data-i18n-aria-label="ui.close" aria-label="Close">×</button>
+        <h2 id="unlock-title" data-i18n="store.unlockAll">Unlock all rooms to hide in</h2>
+        <p id="unlock-blurb" class="unlock-blurb"></p>
+        <button id="unlock-pay" class="primary-button" type="button" data-i18n="store.payContinue">Continue to Stripe</button>
+        <button id="unlock-cancel" class="quiet-button" type="button" data-i18n="store.notNow">Not now</button>
+      </div>
+    </dialog>
+
+    <!-- Loader art: the real flat-pose silhouette, neutralized to warm ivory at
+         startup. Translucent pigment blooms live and mingle inside the body;
+         the heartbeat only scales/composites. No animated SVG filters. -->
+    <svg class="loader-art-defs" width="0" height="0" aria-hidden="true" focusable="false">
+      <defs>
+        <filter id="loader-body-alpha" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+          <feFlood flood-color="#ffffff" result="loader-white"></feFlood>
+          <feComposite in="loader-white" in2="SourceAlpha" operator="in"></feComposite>
+        </filter>
+        <!-- Static source only: compress every non-transparent source color
+             into a narrow warm-ivory value range while retaining soft form. -->
+        <filter id="loader-ivory-body" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+          <feColorMatrix type="matrix" values="
+            .060 .200 .020 0 .69
+            .055 .180 .018 0 .66
+            .047 .155 .015 0 .60
+            0 0 0 1 0">
+          </feColorMatrix>
+        </filter>
+        <clipPath id="loader-eye-clip">
+          <ellipse cx="208" cy="278" rx="39" ry="44"></ellipse>
+        </clipPath>
+        <mask id="loader-body-mask" x="0" y="0" width="512" height="512" maskUnits="userSpaceOnUse">
+          <image data-loader-mask x="0" y="0" width="512" height="512" filter="url(#loader-body-alpha)"></image>
+        </mask>
+        <radialGradient id="loader-breath-glow">
+          <stop offset="0" stop-color="#f8e8a8" stop-opacity=".36"></stop>
+          <stop offset=".42" stop-color="#75e8dc" stop-opacity=".18"></stop>
+          <stop offset=".72" stop-color="#a991f4" stop-opacity=".08"></stop>
+          <stop offset="1" stop-color="#a991f4" stop-opacity="0"></stop>
+        </radialGradient>
+        <radialGradient id="loader-bloom-teal" cx="42%" cy="44%" r="64%">
+          <stop offset="0" stop-color="#31d2c4" stop-opacity=".96"></stop>
+          <stop offset=".42" stop-color="#56b9dc" stop-opacity=".78"></stop>
+          <stop offset=".76" stop-color="#718fe2" stop-opacity=".34"></stop>
+          <stop offset="1" stop-color="#718fe2" stop-opacity="0"></stop>
+        </radialGradient>
+        <radialGradient id="loader-bloom-violet" cx="48%" cy="46%" r="66%">
+          <stop offset="0" stop-color="#9279e7" stop-opacity=".92"></stop>
+          <stop offset=".46" stop-color="#d57fca" stop-opacity=".7"></stop>
+          <stop offset=".78" stop-color="#ee9bb1" stop-opacity=".28"></stop>
+          <stop offset="1" stop-color="#ee9bb1" stop-opacity="0"></stop>
+        </radialGradient>
+        <radialGradient id="loader-bloom-coral" cx="52%" cy="45%" r="65%">
+          <stop offset="0" stop-color="#ef7a65" stop-opacity=".94"></stop>
+          <stop offset=".43" stop-color="#ee9b67" stop-opacity=".76"></stop>
+          <stop offset=".77" stop-color="#f2c766" stop-opacity=".3"></stop>
+          <stop offset="1" stop-color="#f2c766" stop-opacity="0"></stop>
+        </radialGradient>
+        <radialGradient id="loader-bloom-gold" cx="46%" cy="48%" r="64%">
+          <stop offset="0" stop-color="#f2cd62" stop-opacity=".94"></stop>
+          <stop offset=".45" stop-color="#f0a15e" stop-opacity=".7"></stop>
+          <stop offset=".78" stop-color="#e8839e" stop-opacity=".26"></stop>
+          <stop offset="1" stop-color="#e8839e" stop-opacity="0"></stop>
+        </radialGradient>
+        <radialGradient id="loader-wet-light" cx="50%" cy="50%" r="50%">
+          <stop offset="0" stop-color="#fffdf0" stop-opacity=".92"></stop>
+          <stop offset=".34" stop-color="#d9fffb" stop-opacity=".38"></stop>
+          <stop offset="1" stop-color="#d9fffb" stop-opacity="0"></stop>
+        </radialGradient>
+      </defs>
+      <symbol id="loader-live-chameleon" viewBox="0 0 512 512">
+        <ellipse class="loader-breath-aura" cx="260" cy="300" rx="190" ry="118" fill="url(#loader-breath-glow)"></ellipse>
+        <g class="loader-chameleon-body">
+          <!-- Instant sketch: an inline low-res thumbnail of the same flat-pose
+               art (soft "watercolor study" look when upscaled). Shows outline +
+               eye with zero network; the crisp PNG covers it when it decodes. -->
+          <image class="loader-sketch" href="data:image/webp;base64,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" x="0" y="0" width="512" height="512" filter="url(#loader-ivory-body)"></image>
+          <image class="loader-avatar-art" data-loader-mask x="0" y="0" width="512" height="512" filter="url(#loader-ivory-body)"></image>
+          <!-- Keep the authored eye detail underneath the translucent live paint. -->
+          <image class="loader-avatar-eye" data-loader-mask x="0" y="0" width="512" height="512" clip-path="url(#loader-eye-clip)"></image>
+          <g class="loader-live-paint" mask="url(#loader-body-mask)">
+            <g class="loader-pigment-heart">
+              <!-- Five soft-edged, organic washes slowly bloom into one
+                   another. The ivory body remains their paper. -->
+              <path class="loader-pigment-bloom loader-bloom-head" fill="url(#loader-bloom-teal)" d="M48 307C58 251 88 183 145 153C192 128 244 152 257 199C269 243 241 307 192 342C145 376 72 366 50 326C47 320 47 313 48 307Z"></path>
+              <path class="loader-pigment-bloom loader-bloom-crown" fill="url(#loader-bloom-coral)" d="M132 148C169 118 247 125 303 164C346 194 333 238 290 247C247 256 213 221 164 220C124 219 105 171 132 148Z"></path>
+              <path class="loader-pigment-bloom loader-bloom-back" fill="url(#loader-bloom-violet)" d="M244 194C299 168 382 190 429 238C466 275 453 321 408 339C356 360 307 321 263 292C226 267 211 210 244 194Z"></path>
+              <path class="loader-pigment-bloom loader-bloom-belly" fill="url(#loader-bloom-gold)" d="M139 286C196 267 289 276 353 311C401 337 397 376 352 394C293 417 222 379 162 372C111 366 94 302 139 286Z"></path>
+              <path class="loader-pigment-bloom loader-bloom-tail" fill="url(#loader-bloom-teal)" d="M342 279C381 247 451 252 478 298C504 342 471 391 417 401C366 410 326 370 326 329C326 308 331 290 342 279Z"></path>
+              <ellipse class="loader-wet-light" cx="274" cy="270" rx="58" ry="34" fill="url(#loader-wet-light)"></ellipse>
+            </g>
+          </g>
+        </g>
+      </symbol>
+    </svg>
+
+  </body>
+</html>

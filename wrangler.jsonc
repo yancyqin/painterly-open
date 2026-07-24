@@ -1,0 +1,63 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "painterly-chameleon-itch-local",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-07-17",
+  "assets": {
+    "directory": "dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "painterly-chameleon-prod",
+      "database_id": "d78716f2-4d3f-4233-9225-1cce713e8fe0"
+    }
+  ],
+  "ratelimits": [
+    {
+      "name": "PUBLISH_LIMITER",
+      "namespace_id": "51201",
+      "simple": { "limit": 6, "period": 60 }
+    },
+    {
+      "name": "REPORT_LIMITER",
+      "namespace_id": "51202",
+      "simple": { "limit": 10, "period": 60 }
+    },
+    {
+      "name": "ATTEMPT_LIMITER",
+      "namespace_id": "51203",
+      "simple": { "limit": 60, "period": 60 }
+    },
+    {
+      "name": "AUTH_LIMITER",
+      "namespace_id": "51204",
+      "simple": { "limit": 6, "period": 60 }
+    }
+  ],
+  "triggers": {
+    "crons": ["0 * * * *"]
+  },
+  "vars": {
+    "PUBLIC_ORIGIN": "https://pc.lucasacademy.org",
+    // Shareable play link (and QR target). {token} is substituted. Point this at
+    // another platform's URL/deep link to publish the QR there. Local dev ignores
+    // it and uses the dev origin.
+    "SHARE_LINK_TEMPLATE": "https://pc.lucasacademy.org/?c={token}",
+    "TURNSTILE_ALLOWED_HOSTNAME": "pc.lucasacademy.org",
+    // Local static-client testing is deliberately explicit. Production must
+    // set the real itch iframe origin as a Worker secret/var before upload.
+    "ITCH_ALLOWED_ORIGINS": "http://localhost:4173,http://127.0.0.1:4173",
+    "TURNSTILE_SITE_KEY": "0x4AAAAAAD4XA7yN3fYicdQZ",
+    "OTP_FROM_ADDRESS": "noreply@lucasacademy.org"
+  },
+  "send_email": [
+    { "name": "EMAIL" }
+  ],
+  "observability": {
+    "enabled": true
+  }
+}

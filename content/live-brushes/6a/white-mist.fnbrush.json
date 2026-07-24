@@ -1,0 +1,24 @@
+{
+  "$schema": "https://lucasacademy.org/art-lab/schemas/function-brush-v1.schema.json",
+  "format": "lucas-function-brush",
+  "version": 1,
+  "id": "white-mist",
+  "name": "White Mist",
+  "revision": "sha256:e678c08cee4e4d95af66ca5516e19bb3a6ae57fa44517a0ea14ecd77c4559b8e",
+  "source": "// White Mist — compatibility id for a pigment-only alpha breath; no white or fog.\nconst FLOW = 3;\nconst SIZE = 30;\nconst FADE = 0;\nconst SPEED = 50;\nconst LINKS = 0;\nconst TERRITORY = 0;\nconst REBUILD_PHOTO = 1;\nconst PHOTO_OPACITY = 100;\nconst PHOTO_BLUR = 0;\n\nfunction ease(a, b, value) {\n  const x = Math.max(0, Math.min(1, (value - a) / (b - a)));\n  return x * x * (3 - 2 * x);\n}\n\nfunction brush(point, stroke, t) {\n  const marks = [];\n  for (let i = 0; i < FLOW; i += 1) {\n    const seed = point.index * 41 + i * 17 + stroke.seed * 97;\n    const c = photo(point.x, point.y, PHOTO_BLUR);\n    if (!c) continue;\n    marks.push({\n      x: point.x + (rand(seed) - .5) * SIZE * .5,\n      y: point.y + (rand(seed + 9) - .5) * SIZE * .35,\n      size: SIZE * (.85 + rand(seed + 21) * .55),\n      alpha: .28 * PHOTO_OPACITY / 100,\n      red: c.red, green: c.green, blue: c.blue,\n      soft: 1\n    });\n  }\n  return marks;\n}\n\nfunction move(mark, t) {\n  const speed = .08 + mark.seed * .044;\n  const cycle = (t * speed + mark.seed) % 1;\n  const growth = ease(.005, .8, cycle);\n  const appear = ease(.015, .34, cycle);\n  const disappear = 1 - ease(.64, .985, cycle);\n  const phase = cycle * TAU;\n  return {\n    dx: Math.sin(phase * .47) * 2.4,\n    dy: Math.cos(phase * .39) * 1.7,\n    size: .38 + growth * 1.02,\n    alpha: appear * disappear * .72\n  };\n}\n",
+  "capabilities": [
+    "brush",
+    "move"
+  ],
+  "settings": {
+    "FLOW": 3,
+    "SIZE": 30,
+    "FADE": 0,
+    "SPEED": 50,
+    "LINKS": 0,
+    "TERRITORY": 0,
+    "REBUILD_PHOTO": 1,
+    "PHOTO_OPACITY": 100,
+    "PHOTO_BLUR": 0
+  }
+}

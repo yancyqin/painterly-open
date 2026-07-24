@@ -1,0 +1,33 @@
+{
+  "name": "painterly-chameleon-itch",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Async one-to-many Painterly Chameleon validation app",
+  "scripts": {
+    "dev": "npm run build && wrangler dev --ip 0.0.0.0 --port 8787",
+    "dev:itch:worker": "npm run build:itch && wrangler dev --ip 0.0.0.0 --port 8788",
+    "dev:client": "vite --host 0.0.0.0",
+    "dev:itch": "vite --host 0.0.0.0 --mode itch",
+    "dev:itch:client": "VITE_API_ORIGIN=http://127.0.0.1:8788 vite --host 0.0.0.0 --port 4173 --mode itch",
+    "build": "tsc --noEmit && vite build",
+    "build:itch": "tsc --noEmit && vite build --mode itch",
+    "package:itch": "VITE_API_ORIGIN=https://pc.lucasacademy.org npm run build:itch && cd dist && zip -FSrq ../painterly-chameleon-itch.zip .",
+    "db:migrate:local": "wrangler d1 migrations apply painterly-chameleon-prod --local",
+    "db:migrate:remote": "wrangler d1 migrations apply painterly-chameleon-prod --remote",
+    "live:check": "node scripts/import-live-painting.mjs content/live-projects/van-gogh-sunflower-parlor-1a.lpp van-gogh-sunflower-parlor-1a --check && node scripts/import-live-painting.mjs content/live-projects/van-gogh-starry-studio-1b.lpp van-gogh-starry-studio-1b --check && node scripts/import-live-painting.mjs content/live-projects/van-gogh-cypress-bedroom-1c.lpp van-gogh-cypress-bedroom-1c --check",
+    "check": "node --check src/core.js && node --check src/worker.js && npm run live:check && npm run build && npm test",
+    "test": "node --test"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "vite": "^7.2.2",
+    "wrangler": "4.112.0"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "qr": "^0.6.0"
+  }
+}

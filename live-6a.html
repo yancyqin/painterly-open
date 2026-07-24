@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#111525">
+    <meta name="description" content="A live-painting study for 6A Blank Canvas Morning.">
+    <title>6A Live Painting Study · Painterly Chameleon</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/src/live6a.css">
+    <script type="module" src="/src/live6a.ts"></script>
+  </head>
+  <body>
+    <main class="live-study">
+      <header class="study-bar">
+        <a class="study-brand" href="/" aria-label="Painterly Chameleon home">
+          <span class="study-brand-mark" aria-hidden="true">◒</span>
+          <span>Painterly Chameleon</span>
+        </a>
+        <p class="study-name">6A · Blank Canvas Morning</p>
+        <button id="live-toggle" class="live-toggle is-on" type="button" aria-pressed="true">
+          <span class="live-dot" aria-hidden="true"></span>
+          live
+        </button>
+      </header>
+
+      <section class="study-grid" aria-label="Live painting experiment">
+        <section class="room-card" aria-label="Live room preview">
+          <div class="room-frame">
+            <canvas id="room-canvas" width="960" height="640" aria-label="Blank Canvas Morning with a draggable camouflaged chameleon"></canvas>
+            <div id="room-loading" class="room-loading" aria-live="polite">painting…</div>
+            <p class="room-note">drag the chameleon</p>
+          </div>
+
+          <div class="room-controls">
+            <div class="study-tabs" role="group" aria-label="Background study">
+              <button class="study-tab is-active" type="button" data-study="0" aria-pressed="true">study 1</button>
+              <button class="study-tab" type="button" data-study="1" aria-pressed="false">study 2</button>
+              <button class="study-tab" type="button" data-study="2" aria-pressed="false">study 3</button>
+            </div>
+          </div>
+        </section>
+
+        <aside class="brush-card" aria-label="Live Brush studio">
+          <div class="brush-heading">
+            <p>live brushes</p>
+            <h1>paint the motion.</h1>
+          </div>
+
+          <div class="avatar-test-tabs" role="tablist" aria-label="6A test mode">
+            <button class="avatar-test-tab is-active" type="button" role="tab" data-avatar-test-tab="paint" aria-selected="true">paint</button>
+            <button class="avatar-test-tab" type="button" role="tab" data-avatar-test-tab="liquid" aria-selected="false">liquid bench</button>
+          </div>
+
+          <div class="chameleon-paper">
+            <canvas id="brush-canvas" width="512" height="512" aria-label="Paint live camouflage directly on the chameleon"></canvas>
+            <span id="brush-label" class="brush-label">liquid color</span>
+          </div>
+
+          <div class="avatar-test-panel" data-avatar-test-panel="paint" role="tabpanel">
+            <div class="brush-grid" role="group" aria-label="Choose a Live Brush">
+              <button class="brush-choice" type="button" data-brush="blue-current" aria-pressed="false">
+                <span class="brush-swatch swatch-current" aria-hidden="true"></span>
+                <span><strong>blue current</strong><small>the arc keeps flowing</small></span>
+              </button>
+              <button class="brush-choice is-active" type="button" data-brush="liquid-color" aria-pressed="true">
+                <span class="brush-swatch swatch-liquid" aria-hidden="true"></span>
+                <span><strong>liquid color</strong><small>paint appears and melts</small></span>
+              </button>
+              <button class="brush-choice" type="button" data-brush="graphite-whisper" aria-pressed="false">
+                <span class="brush-swatch swatch-graphite" aria-hidden="true"></span>
+                <span><strong>graphite whisper</strong><small>sketch lines wake</small></span>
+              </button>
+            </div>
+
+            <div class="brush-tuning" aria-label="Live Brush controls">
+              <label for="brush-size"><span>size</span><input id="brush-size" type="range" min="16" max="120" value="52"></label>
+              <label for="brush-flow"><span>flow</span><input id="brush-flow" type="range" min="10" max="100" value="68"></label>
+            </div>
+
+            <div class="brush-actions">
+              <button id="undo-paint" class="quiet-action" type="button" disabled>undo</button>
+              <button id="clear-paint" class="quiet-action" type="button">clear</button>
+            </div>
+          </div>
+
+          <div class="avatar-test-panel liquid-bench" data-avatar-test-panel="liquid" role="tabpanel" hidden>
+            <p class="liquid-bench-note">Layer 6 only. The room animation is frozen so this compares the chameleon’s Liquid pass. Erosion adds a faint untimed reference underneath so the dragon remains visible. Batch uses one pre-baked ring atlas and one composite per frame.</p>
+            <label class="liquid-count" for="liquid-bench-count">
+              <span>marks</span>
+              <input id="liquid-bench-count" type="range" min="20" max="320" step="20" value="320">
+              <output id="liquid-bench-count-value" for="liquid-bench-count">320</output>
+            </label>
+            <div class="liquid-pass-grid" role="group" aria-label="Liquid renderer pass">
+              <button class="liquid-pass is-active" type="button" data-liquid-pass="full" aria-pressed="true">full · batched</button>
+              <button class="liquid-pass" type="button" data-liquid-pass="legacy-full" aria-pressed="false">legacy full</button>
+              <button class="liquid-pass" type="button" data-liquid-pass="erosion" aria-pressed="false">erosion only</button>
+              <button class="liquid-pass" type="button" data-liquid-pass="relay-tint" aria-pressed="false">tint re-lay</button>
+              <button class="liquid-pass" type="button" data-liquid-pass="relay" aria-pressed="false">re-lay only</button>
+              <button class="liquid-pass" type="button" data-liquid-pass="batch-erosion" aria-pressed="false">batch erosion</button>
+              <button class="liquid-pass" type="button" data-liquid-pass="batch-tint" aria-pressed="false">batch tint</button>
+              <button class="liquid-pass" type="button" data-liquid-pass="off" aria-pressed="false">off baseline</button>
+            </div>
+            <button id="liquid-bench-generate" class="liquid-generate" type="button">generate deterministic liquid marks</button>
+            <output id="liquid-bench-metrics" class="liquid-bench-metrics" aria-live="polite">warming up…</output>
+          </div>
+        </aside>
+      </section>
+    </main>
+  </body>
+</html>

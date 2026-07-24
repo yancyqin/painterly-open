@@ -1,0 +1,16 @@
+# Local-only secrets for `wrangler dev`. Copy to `.dev.vars` (which is gitignored)
+# and fill in your Stripe TEST-mode keys to exercise checkout locally.
+#
+#   cp .dev.vars.example .dev.vars   # then edit
+#
+# With both set, /api/config returns products.checkout=true and the lobby's
+# locked houses route through real Stripe checkout instead of the dev-grant.
+# Use Stripe TEST keys here (sk_test_… / whsec_… from `stripe listen`), never live.
+
+# Stripe secret key — server-side, creates checkout sessions.
+STRIPE_SECRET_KEY=sk_test_xxx
+
+# Stripe webhook signing secret — verifies webhook authenticity.
+# Locally, run:  stripe listen --forward-to localhost:8787/api/webhooks/stripe
+# and paste the whsec_… it prints.
+STRIPE_WEBHOOK_SECRET=whsec_xxx

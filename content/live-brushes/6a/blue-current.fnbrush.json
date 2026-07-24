@@ -1,0 +1,24 @@
+{
+  "$schema": "https://lucasacademy.org/art-lab/schemas/function-brush-v1.schema.json",
+  "format": "lucas-function-brush",
+  "version": 1,
+  "id": "blue-current",
+  "name": "Blue Current",
+  "revision": "sha256:f0a4b92f96d3cba81290d1e28e36a6296ad079be73c778729b184e29bfe67912",
+  "source": "// Blue Current — normal paint flows with the production room current.\nconst FLOW = 2;\nconst SIZE = 26;\nconst FADE = 0;\nconst SPEED = 50;\nconst LINKS = 0;\nconst TERRITORY = 0;\nconst REBUILD_PHOTO = 1;\nconst PHOTO_OPACITY = 100;\nconst PHOTO_BLUR = 0;\n\nfunction brush(point, stroke, t) {\n  const marks = [];\n  for (let i = 0; i < FLOW; i += 1) {\n    const seed = point.index * 37 + i * 23 + stroke.seed * 71;\n    const c = photo(point.x, point.y, PHOTO_BLUR);\n    if (!c) continue;\n    marks.push({\n      x: point.x + (rand(seed) - .5) * 9,\n      y: point.y + (rand(seed + 7) - .5) * 9,\n      size: SIZE * (.8 + rand(seed + 17) * .55),\n      alpha: .26 * PHOTO_OPACITY / 100,\n      red: c.red, green: c.green, blue: c.blue,\n      shape: \"streak\",\n      angle: point.angle * 180 / Math.PI + (rand(seed + 31) - .5) * 12,\n      soft: .75\n    });\n  }\n  return marks;\n}\n\nfunction move(mark, t) {\n  const phase = t + mark.seed * TAU;\n  return {\n    dx: ((t * 18 + mark.seed * 55) % 48) - 24,\n    dy: Math.sin(phase) * 2.1,\n    size: 1 + Math.sin(phase * .8) * .08,\n    alpha: .16 + (Math.sin(phase * 1.2) + 1) * .08\n  };\n}\n",
+  "capabilities": [
+    "brush",
+    "move"
+  ],
+  "settings": {
+    "FLOW": 2,
+    "SIZE": 26,
+    "FADE": 0,
+    "SPEED": 50,
+    "LINKS": 0,
+    "TERRITORY": 0,
+    "REBUILD_PHOTO": 1,
+    "PHOTO_OPACITY": 100,
+    "PHOTO_BLUR": 0
+  }
+}

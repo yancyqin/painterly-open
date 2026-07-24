@@ -1,0 +1,1665 @@
+:root {
+  color-scheme: dark;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #f5eddb;
+  background: #111525;
+  font-synthesis: none;
+  --ink: #f5eddb;
+  --muted: #bdb4a4;
+  --line: rgba(235, 214, 167, .2);
+  --gold: #e4bd64;
+  --gold-dark: #6b5227;
+  --card: rgba(24, 27, 43, .94);
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  clip-path: inset(50%) !important;
+  white-space: nowrap !important;
+}
+html { min-width: 320px; min-height: 100%; background: #111525; }
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0;
+  /* The stage promises no sideways page scroll at any viewport; clip is the
+   * safety net if some overlay (Turnstile, paint studio) briefly overshoots. */
+  overflow-x: clip;
+  background:
+    radial-gradient(circle at 8% 0%, rgba(39, 83, 103, .35), transparent 35rem),
+    radial-gradient(circle at 96% 28%, rgba(172, 112, 45, .18), transparent 28rem),
+    linear-gradient(145deg, #101522, #171a2b 56%, #111522);
+}
+button, input { font: inherit; }
+select { font: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+button { cursor: pointer; }
+
+.wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ink);
+  text-decoration: none;
+  font-family: Georgia, serif;
+  font-size: 19px;
+  letter-spacing: .015em;
+}
+.wordmark-mark { color: var(--gold); font-size: 28px; line-height: 1; transform: rotate(-17deg); }
+
+.page-shell {
+  width: min(1120px, calc(100% - 32px));
+  margin: 12px auto 24px;
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+/* Game views get a wider shell so the 960px world stays dominant beside its
+ * rail. Explore/admin keep the reading width (graceful no-:has fallback). */
+.page-shell:has(> .view:not([hidden]) > .game-stage) {
+  width: min(1368px, calc(100% - 24px));
+  margin-top: 12px;
+  margin-bottom: 24px;
+}
+.view { animation: enter .38s ease-out; }
+@keyframes enter { from { opacity: 0; transform: translateY(8px); } }
+.hero-copy { max-width: 820px; margin: 0 0 30px; }
+.hero-copy.compact { margin-bottom: 24px; }
+.eyebrow, .step-label {
+  margin: 0 0 8px;
+  color: #d8b866;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+h1, h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 500; }
+h1 { max-width: 900px; margin: 0; font-size: clamp(42px, 7vw, 82px); line-height: .98; letter-spacing: -.045em; }
+.compact h1 { font-size: clamp(38px, 5.8vw, 66px); }
+.lede { max-width: 740px; margin: 22px 0 0; color: var(--muted); font-size: 17px; line-height: 1.65; }
+
+.play-card {
+  padding: clamp(18px, 3vw, 34px);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: linear-gradient(152deg, rgba(30, 32, 48, .97), rgba(17, 21, 35, .97));
+  box-shadow: 0 30px 90px rgba(0, 0, 0, .28), inset 0 1px rgba(255, 255, 255, .025);
+}
+/* ---- Game Stage ------------------------------------------------------- */
+/* One responsive shell shared by the Hider and Seeker experiences: a compact
+ * HUD heading, a dominant canvas viewport, a tools rail (joystick, Close Look,
+ * status, primary actions) and secondary DOM panels — all inside one frame.
+ * The 960×640 game world only ever scales visually; hit-testing reads the
+ * canvas rect at event time, so layout never touches game coordinates. */
+.game-stage {
+  --stage-vh: 100vh;
+  --canvas-max-h: calc(var(--stage-vh) - 164px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: clamp(12px, 1.6vw, 20px);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: linear-gradient(152deg, rgba(30, 32, 48, .97), rgba(17, 21, 35, .97));
+  box-shadow: 0 30px 90px rgba(0, 0, 0, .28), inset 0 1px rgba(255, 255, 255, .025);
+}
+@supports (height: 100dvh) { .game-stage { --stage-vh: 100dvh; } }
+
+.stage-brand-row {
+  display: flex;
+  min-height: 28px;
+  align-items: center;
+  padding: 0 4px;
+}
+.stage-brand-row:has(.locale-select) { justify-content: space-between; }
+/* The lobby toolbar shares the play views' brand-row wordmark size so the
+ * header reads the same across the create / seek / lobby stages. */
+.stage-brand-row .wordmark, .explore-toolbar .wordmark { font-size: 17px; }
+.stage-brand-row .wordmark-mark, .explore-toolbar .wordmark-mark { font-size: 24px; }
+
+.stage-main { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+.stage-viewport { position: relative; display: flex; min-width: 0; }
+.stage-viewport .canvas-shell { flex: 1; display: grid; place-items: center; min-width: 0; }
+
+.stage-rail { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.stage-rail .control-deck { margin-top: 0; }
+.stage-rail .create-actions { margin-top: 0; }
+/* Reserve the arrow's space on the row itself, not on the paint button — a
+ * per-button margin would shrink paint under align-items: stretch and leave it
+ * shorter than hide. This keeps paint and hide the same size. */
+.stage-rail .create-actions:has(.needs-attention) { margin-top: 13px; }
+.stage-rail .needs-attention::before { top: -29px; left: 8px; }
+
+#seeker-game { display: flex; flex-direction: column; gap: 10px; min-width: 0; transition: opacity .25s ease; }
+#seeker-game.is-waiting { opacity: .55; pointer-events: none; }
+.stage-rail .result-panel { margin-top: 0; }
+
+.stage-panels { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px; padding: 0 2px; }
+.stage-panels > * { margin: 0; }
+.stage-panels .turnstile-slot:not(:empty) { flex-basis: 100%; }
+/* Keep the "share" toggle anchored bottom-left; everything else stays right. */
+.stage-panels .public-option { margin-inline-end: auto; }
+
+/* ---- Playable stage: fill-screen, controls-below layout ---------------- *
+ * Hider & Seeker share one layout that fills the screen exactly like the
+ * Lobby (identical frame size), with the 960×640 canvas dominant on top and
+ * the joystick / Close Look / actions docked in a bar beneath it. (This used
+ * to be a right-hand rail on wide screens, which left the frame shorter than
+ * the Lobby.) Scoped to [data-stage] so Lobby / admin / error are untouched. */
+/* Fixed frame height (not just min-height) so the canvas area — the 1fr grid
+ * row — absorbs the slack and shrinks to fit; otherwise the native-640 canvas
+ * plus the control bar would overflow the frame. --deck-h sizes the bar. */
+.game-stage[data-stage] {
+  --deck-h: 132px;
+  height: calc(var(--stage-vh) - 36px);
+}
+.game-stage[data-stage] .stage-main {
+  flex: 1;
+  min-height: 0;
+  grid-template-columns: minmax(0, 1fr);   /* never the old 2-column split */
+  grid-template-rows: minmax(0, 1fr) auto;  /* canvas grows, controls hug bottom */
+}
+.game-stage[data-stage] .stage-viewport { min-height: 0; display: grid; place-items: center; }
+/* fitPlayableCanvas() (JS) sizes the shell to the largest 3:2 box that fits the
+ * viewport, so the room fills the shell edge-to-edge (no gutters) and the
+ * border + canvas pills hug the room. The canvas fills the shell 1:1 (both 3:2
+ * = the native 960×640), so getBoundingClientRect == drawing area and click/tap
+ * hit-testing stays exact; the frame around the shell reads as wall. */
+.game-stage[data-stage] .stage-viewport .canvas-shell { flex: none; max-width: 100%; max-height: 100%; }
+.game-stage[data-stage] .canvas-shell canvas {
+  position: static;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+}
+
+/* Controls sit in a centered, wrapping bar under the canvas. */
+.game-stage[data-stage] .stage-rail {
+  flex: none;
+  flex-flow: row wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px 14px;
+}
+.game-stage[data-stage] .control-deck {
+  display: flex;
+  flex: 0 1 auto;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin: 0;
+}
+/* Decks share one height (--deck-h); Close Look sizes its 16:9 canvas to it. */
+.game-stage[data-stage] .movement-deck { flex: 0 0 auto; width: var(--deck-h); height: var(--deck-h); min-height: 0; }
+.game-stage[data-stage] .inspection-deck { flex: 0 0 auto; height: var(--deck-h); min-height: 0; }
+/* Close Look: drive size from a definite height and center it (align-self)
+ * so the 16:9 canvas is never stretched to the deck width (= no distortion). */
+.game-stage[data-stage] .inspection-deck canvas {
+  flex: none;
+  align-self: center;
+  width: auto;
+  height: calc(var(--deck-h) - 42px);
+  min-height: 0;
+  max-width: 100%;
+}
+/* Paint + Hide stack into a column that matches the deck height, so the actions
+ * read as a balanced third panel in the bar (not two small buttons floating). */
+.game-stage[data-stage] .create-actions {
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: 8px;
+  width: clamp(150px, 22vw, 200px);
+  height: var(--deck-h);
+  margin: 0;
+}
+.game-stage[data-stage] .create-actions > * { flex: 1 1 0; min-height: 0; }
+/* In the centered bar the paint arrow sits above the button; no row offset. */
+.game-stage[data-stage] .stage-rail .create-actions:has(.needs-attention) { margin-top: 0; }
+
+/* Seeker: timer + controls + live stats flow along the same bar. */
+.game-stage[data-stage] #seeker-game {
+  flex: 1 1 auto;
+  flex-flow: row wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px 14px;
+}
+.game-stage[data-stage] .game-status-row {
+  flex: 0 0 auto;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  min-width: 96px;
+  height: var(--deck-h);
+}
+.game-stage[data-stage] .seek-stats { flex: 0 0 auto; width: min(280px, 68vw); margin: 0; }
+.game-stage[data-stage] .result-panel { flex: 1 1 100%; margin: 0; }
+/* The Hider's Close Look adds little on desktop (the chameleon is right there on
+ * the big canvas), so hide it there; on phones the canvas is small, so keep it
+ * (zoomed in on the chameleon — see HIDER_INSPECTION_* in GameCanvas). */
+@media (min-width: 761px) {
+  .game-stage[data-stage="hider"] .inspection-deck { display: none; }
+}
+.stage-footer-brand { display: flex; align-items: center; gap: 10px; margin-inline-end: auto !important; }
+.stage-footer-brand .wordmark { font-size: 17px; }
+.stage-footer-brand .wordmark-mark { font-size: 24px; }
+.support-link { color: #cdb271; font-size: 11px; font-weight: 800; letter-spacing: .04em; text-decoration: none; white-space: nowrap; }
+.support-link:hover { color: #f0d88c; text-decoration: underline; text-underline-offset: 3px; }
+.locale-select {
+  min-height: 34px;
+  width: 86px;
+  max-width: 86px;
+  border: 1px solid rgba(233, 214, 169, .26);
+  border-radius: 999px;
+  padding: 5px 24px 5px 9px;
+  color: #d9cfbd;
+  background: #171b2c;
+  font-size: 11px;
+  cursor: pointer;
+}
+.art-house-switcher { display: flex; flex-wrap: wrap; gap: 6px; }
+.art-house-chip {
+  display: grid;
+  grid-template-columns: 42px auto;
+  align-items: center;
+  gap: 7px;
+  min-height: 42px;
+  overflow: hidden;
+  border: 1px solid rgba(232, 210, 158, .22);
+  border-radius: 10px;
+  padding: 4px 9px 4px 4px;
+  color: #aaa398;
+  background: rgba(13, 17, 29, .62);
+  font-size: 10px;
+  font-weight: 850;
+}
+.art-house-chip img { width: 42px; height: 30px; border-radius: 7px; object-fit: cover; }
+.art-house-chip.is-active { border-color: rgba(237, 207, 125, .7); color: #f4dda0; background: rgba(218, 177, 81, .12); }
+.room-name-button {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid rgba(137, 210, 201, .42);
+  border-radius: 999px;
+  padding: 7px 11px;
+  color: #e9f8f1;
+  background: rgba(49, 113, 112, .16);
+}
+.room-name-button strong { font: 600 14px/1 Georgia, serif; }
+.room-name-button span { color: #91c8bf; font-size: 15px; }
+/* On the Hider canvas the room-name control is a pill in the bottom-left,
+ * mirroring the seeker's read-only room-name tag (bottom-left too). */
+.canvas-room-name-button {
+  position: absolute;
+  z-index: 6;
+  bottom: 11px;
+  left: 11px;
+  max-width: calc(100% - 22px);
+  background: rgba(13, 16, 26, .74);
+  backdrop-filter: blur(8px);
+}
+.canvas-room-name-button strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Manage / error states reuse the stage frame so the between-rounds screens
+ * feel like the same game, not a separate site page. */
+.stage-solo { max-width: 880px; width: 100%; margin-inline: auto; }
+.stage-solo .play-card { padding: clamp(4px, 1vw, 10px); border: 0; background: transparent; box-shadow: none; }
+/* ----------------------------------------------------------------------- */
+.state-pill {
+  flex: none;
+  padding: 7px 11px;
+  border: 1px solid #5d5961;
+  border-radius: 999px;
+  color: #a9a3a0;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+.state-pill.is-ready { border-color: #789e7d; color: #a8d7ac; background: rgba(68, 111, 76, .18); }
+.canvas-state, .canvas-meta {
+  position: absolute;
+  z-index: 3;
+  top: 11px;
+  right: 11px;
+  pointer-events: none;
+  backdrop-filter: blur(8px);
+}
+.canvas-meta {
+  padding: 6px 9px;
+  border: 1px solid rgba(236, 215, 168, .28);
+  border-radius: 999px;
+  color: #eee4cc;
+  background: rgba(13, 16, 26, .72);
+  font-size: 10px;
+  font-weight: 800;
+}
+.canvas-room-name {
+  position: absolute;
+  z-index: 6;
+  bottom: 11px;
+  left: 11px;
+  padding: 7px 10px;
+  border: 1px solid rgba(236, 215, 168, .28);
+  border-radius: 999px;
+  color: #f3e4be;
+  background: rgba(13, 16, 26, .76);
+  font: 600 14px/1 Georgia, serif;
+  pointer-events: none;
+  backdrop-filter: blur(8px);
+}
+
+.canvas-shell {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid rgba(239, 217, 168, .24);
+  border-radius: 16px;
+  background: #0e1220;
+  box-shadow: inset 0 0 40px #0008;
+}
+/* Contain-fit: the 960×640 world scales down (never up past its native size,
+ * never cropped). When the viewport ratio differs, the shell's painted
+ * vignette becomes decorative gutters around the centered canvas. */
+.canvas-shell canvas {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: max(240px, var(--canvas-max-h, 100vh));
+  aspect-ratio: 3 / 2;
+  touch-action: manipulation;
+  cursor: crosshair;
+}
+.canvas-title {
+  position: absolute;
+  z-index: 3;
+  top: 10px;
+  left: 12px;
+  margin: 0;
+  padding: 6px 10px;
+  border-radius: 999px;
+  color: #f5df9f;
+  background: rgba(13, 16, 26, .72);
+  font: 600 clamp(14px, 2.1vw, 20px)/1 Georgia, serif;
+  letter-spacing: -.015em;
+  pointer-events: none;
+  backdrop-filter: blur(8px);
+}
+.canvas-shell.is-miss { animation: miss .25s ease-out; }
+@keyframes miss { 35% { transform: translateX(-4px); } 70% { transform: translateX(4px); } }
+.control-deck {
+  display: grid;
+  grid-template-columns: minmax(250px, .85fr) minmax(300px, 1.15fr);
+  gap: 10px;
+}
+.movement-deck, .inspection-deck {
+  min-height: 156px;
+  border: 1px solid rgba(233, 216, 181, .14);
+  border-radius: 14px;
+  background: rgba(13, 17, 29, .68);
+}
+.movement-deck {
+  display: grid;
+  place-items: center;
+  padding: 12px;
+}
+.tool-label { margin: 0; color: #d8b866; font-size: 10px; font-weight: 900; letter-spacing: .14em; text-transform: uppercase; }
+.joystick {
+  position: relative;
+  width: 112px;
+  height: 112px;
+  margin: auto;
+  border: 1px solid rgba(238, 211, 142, .4);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(66, 61, 65, .55), rgba(18, 21, 34, .92) 68%);
+  box-shadow: inset 0 0 22px #0008;
+  touch-action: none;
+  user-select: none;
+}
+.joystick-arrows { position: absolute; inset: 0; display: grid; place-items: center; color: rgba(232, 210, 159, .2); font-size: 62px; font-weight: 200; pointer-events: none; }
+.joystick-knob {
+  position: absolute;
+  z-index: 2;
+  top: calc(50% - 22px);
+  left: calc(50% - 22px);
+  width: 44px;
+  height: 44px;
+  border: 1px solid #f1d992;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #e6c66d, #967234);
+  box-shadow: 0 6px 14px #0008, inset 0 1px #fff8;
+  pointer-events: none;
+  transition: transform 80ms ease-out;
+}
+.joystick:active .joystick-knob { transition: none; }
+.control-deck.is-disabled { opacity: .48; }
+.control-deck.is-disabled .joystick { cursor: not-allowed; }
+.inspection-deck { display: flex; flex-direction: column; overflow: hidden; padding: 10px; }
+.inspection-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0 2px 8px; color: #8f8b87; font-size: 10px; }
+.inspection-deck canvas { display: block; width: 100%; min-height: 0; flex: 1; border-radius: 8px; background: #0c1020; aspect-ratio: 16 / 9; }
+.inspection-deck canvas[role="button"] { cursor: pointer; }
+.joystick:focus-visible, .inspection-deck canvas[role="button"]:focus-visible { outline: 2px solid #f0d484; outline-offset: 3px; }
+
+.create-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 14px; }
+/* paint + hide share the row (and stack full-width in the rail) as one matched pair. */
+.create-actions > * { flex: 1 1 0; }
+.primary-button, .quiet-button, .danger-button, .game-action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  border-radius: 11px;
+  padding: 10px 15px;
+  font-weight: 800;
+  text-decoration: none;
+}
+.primary-button { border: 1px solid #f0d484; color: #20180b; background: linear-gradient(#ebcb77, #cfa84e); box-shadow: inset 0 1px #fff8; }
+.primary-button:disabled { opacity: .42; cursor: not-allowed; }
+.quiet-button { border: 1px solid #5c5662; color: #e5dece; background: #292a36; }
+.quiet-button:disabled { opacity: .5; cursor: not-allowed; }
+.danger-button { border: 1px solid #945d59; color: #ffc6bf; background: #462b31; }
+.game-action-button {
+  border: 1px solid rgba(247, 222, 154, .78);
+  color: #181510;
+  background: linear-gradient(180deg, #f1d88a, #cfa34b);
+  box-shadow: 0 7px 18px rgba(0, 0, 0, .28), inset 0 1px rgba(255, 255, 255, .65);
+  transition: transform .14s ease, filter .14s ease, box-shadow .14s ease;
+}
+.game-action-button:not(:disabled):hover { transform: translateY(-2px); filter: brightness(1.06); box-shadow: 0 10px 23px rgba(0, 0, 0, .34), inset 0 1px rgba(255, 255, 255, .7); }
+.game-action-button:not(:disabled):active { transform: translateY(1px); }
+/* e.g. "hide" before the chameleon is painted: dimmed, flat, not clickable. */
+.game-action-button:disabled { opacity: .42; box-shadow: none; cursor: not-allowed; }
+.needs-attention { position: relative; isolation: isolate; }
+.needs-attention::before {
+  content: "↘";
+  position: absolute;
+  z-index: 2;
+  left: -14px;
+  top: -39px;
+  color: #f4d77f;
+  font: 900 31px/1 Georgia, serif;
+  filter: drop-shadow(0 3px 5px #000a);
+  pointer-events: none;
+  animation: point-to-paint .9s ease-in-out infinite alternate;
+}
+@keyframes point-to-paint { to { transform: translate(5px, 5px) rotate(3deg); } }
+.public-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 8px 12px;
+  border: 1px solid rgba(228, 189, 100, .24);
+  border-radius: 999px;
+  color: #d9cfbd;
+  background: rgba(228, 189, 100, .055);
+  cursor: pointer;
+}
+.public-option input { flex: none; width: 17px; height: 17px; margin: 0; accent-color: var(--gold); }
+.public-option strong { color: #efe2c7; font-size: 11px; }
+.explore-cta {
+  display: flex;
+  width: fit-content;
+  min-height: 54px;
+  align-items: center;
+  justify-content: center;
+  margin: 18px 0 0 auto;
+  padding: 12px 22px;
+  border: 1px solid rgba(237, 207, 125, .7);
+  border-radius: 999px;
+  color: #f3db98;
+  background: rgba(218, 177, 81, .1);
+  font-size: 16px;
+  font-weight: 850;
+  text-decoration: none;
+  transition: transform .16s ease, background .16s ease;
+}
+.explore-cta:hover { transform: translateX(3px); background: rgba(218, 177, 81, .18); }
+.stage-panels .explore-cta { min-height: 50px; margin: 0; }
+
+/* Pre-start overlay: the room is visible (the hidden chameleon is not drawn
+ * until Start), so "take a look around" is literal — no layout jump on Start. */
+.ready-panel {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  padding: clamp(10px, 4vw, 26px);
+  border-radius: 16px;
+  text-align: center;
+  background: rgba(9, 12, 22, .46);
+  backdrop-filter: blur(2.5px);
+}
+.ready-card {
+  padding: 10px;
+  border: 1px solid rgba(237, 207, 125, .5);
+  border-radius: 14px;
+  background: rgba(16, 19, 32, .93);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, .6);
+}
+.start-button { min-width: 150px; min-height: 52px; font-size: 16px; }
+.game-status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 50px;
+  padding: 5px 11px;
+  border: 1px solid rgba(233, 216, 181, .14);
+  border-radius: 12px;
+  color: #c7bfb0;
+  background: rgba(13, 17, 29, .68);
+}
+.timer { color: #f0cf7a; font: 700 22px/1 ui-monospace, SFMono-Regular, Menlo, monospace; font-variant-numeric: tabular-nums; }
+.timer.is-low { color: #ff9d92; }
+/* Three inspect chances, shown as pips that dim as they're used up. */
+.seek-tries { display: inline-flex; gap: 6px; align-items: center; }
+.seek-pip { width: 12px; height: 12px; border-radius: 50%; background: #ecbf52; box-shadow: 0 0 0 1px rgba(0, 0, 0, .25) inset; }
+.seek-pip.is-used { background: transparent; box-shadow: 0 0 0 1px rgba(236, 191, 82, .4) inset; }
+/* Seeker result (win "my turn →" / lose "time's up!") overlays the canvas as a
+ * modal — same pattern as the pre-start ready panel — so the frame never shifts
+ * when the round ends. */
+.result-panel {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: grid;
+  place-items: center;
+  padding: clamp(10px, 4vw, 26px);
+  text-align: center;
+  background: rgba(9, 12, 22, .55);
+  backdrop-filter: blur(3px);
+}
+.result-panel[hidden] { display: none; }
+.result-card {
+  padding: clamp(16px, 3.5vw, 26px);
+  border: 1px solid rgba(237, 207, 125, .5);
+  border-radius: 16px;
+  background: rgba(16, 19, 32, .95);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, .6);
+}
+.result-card h2 { margin: 0 0 16px; font-size: clamp(24px, 5vw, 30px); }
+.link-button { display: inline-flex; align-items: center; text-decoration: none; }
+.safety-panel {
+  margin-top: 10px;
+  border: 1px solid rgba(233, 215, 174, .12);
+  border-radius: 12px;
+  color: #918c84;
+  background: rgba(13, 17, 29, .4);
+}
+.safety-panel summary { padding: 11px 14px; font-size: 11px; cursor: pointer; }
+.safety-panel-body { padding: 0 14px 14px; }
+.report-actions { display: flex; flex-wrap: wrap; gap: 7px; }
+.report-actions .quiet-button { min-height: 36px; padding: 7px 10px; color: #beb7ab; font-size: 11px; }
+.report-status { min-height: 16px; margin: 9px 0 0; color: #b8c9aa; font-size: 11px; }
+.turnstile-slot { width: min(100%, 420px); min-height: 0; margin: 8px 0; overflow: hidden; border-radius: 8px; }
+.turnstile-slot:empty { display: none; margin: 0; }
+
+.share-label { display: block; margin-bottom: 8px; color: #cfc4b0; font-size: 12px; font-weight: 800; }
+.manage-status { margin: 0 0 12px; color: #d9c47f; font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+.share-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+.share-row input { min-width: 0; border: 1px solid #565563; border-radius: 10px; padding: 11px; color: #f0e9d9; background: #111522; }
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  min-height: 46px;
+  border: 1px solid #565563;
+  border-radius: 10px;
+  color: #e5dece;
+  background: #292a36;
+  font-size: 18px;
+  cursor: pointer;
+}
+.icon-button:hover { border-color: #7a7484; color: #fff4d8; }
+.icon-button.is-copied { border-color: #789e7d; color: #a8d7ac; }
+.icon-button:disabled { opacity: .35; cursor: not-allowed; }
+
+/* One hero action replaces the old copy + send pair. */
+.share-cta { width: 100%; margin-top: 10px; }
+
+/* Share-page screenshots: the Hider's room (with chameleon) and the last find. */
+.shot-figure { margin: 0 0 14px; }
+.shot-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  border: 1px solid rgba(233, 215, 174, .16);
+  border-radius: 14px;
+  background: #0c1020;
+}
+/* The share preview is a clear, local-only room capture. It never enters the
+ * Lobby feed or D1, so it can use the modal's available width. */
+#manage-preview { max-width: 360px; margin-inline: auto; }
+.shot-found { margin: 0 0 4px; }
+.shot-found figcaption { margin-top: 8px; color: #a9d7ac; font-size: 12px; font-weight: 700; text-align: center; }
+
+.manage-refresh { width: 100%; }
+/* Housekeeping actions, small and quiet at the very bottom. */
+.manage-secondary { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 16px; margin-top: 18px; }
+/* Share-on-Lobby toggle in the share modal — same ◉/○ radio language as the
+ * old on-canvas pill: gold when listed, quiet grey when private. */
+.manage-share-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 4px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(156, 146, 127, .55);
+  background: transparent;
+  color: #9c927f;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.manage-share-toggle.is-on {
+  border-color: rgba(240, 216, 140, .75);
+  color: #f0d88c;
+}
+.manage-share-toggle:disabled { opacity: .55; cursor: default; }
+.text-button { min-height: 30px; border: 0; padding: 4px 6px; color: #8f8980; background: transparent; font-size: 11px; text-decoration: underline; cursor: pointer; }
+.text-button:hover { color: #cfc4b0; }
+.text-button-danger { color: #b58a86; }
+.text-button-danger:hover { color: #e8b3ad; }
+
+.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 22px 0; }
+.stats-grid div { padding: 20px; border: 1px solid rgba(233, 215, 174, .14); border-radius: 14px; background: rgba(13, 17, 29, .52); }
+.stats-grid strong { display: block; color: #e8c976; font: 500 clamp(30px, 5vw, 48px)/1 Georgia, serif; }
+.stats-grid span { display: block; margin-top: 7px; color: #918d88; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; }
+.text-link { display: inline-block; margin-top: 22px; color: #d9c27f; }
+
+/* Compact live stats under Close Look on the seeker rail. */
+.seek-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
+.seek-stats div { padding: 9px 5px; border: 1px solid rgba(233, 215, 174, .14); border-radius: 10px; background: rgba(13, 17, 29, .52); text-align: center; }
+.seek-stats strong { display: block; color: #e8c976; font: 500 22px/1 Georgia, serif; font-variant-numeric: tabular-nums; }
+.seek-stats span { display: block; margin-top: 4px; color: #918d88; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; }
+
+.error-card { max-width: 720px; }
+.error-card h1 { font-size: clamp(36px, 6vw, 64px); }
+
+/* The Lobby reuses the shared .game-stage frame (same border/bg/shadow as the
+ * Hider & Seeker screens) and fills the screen, so browsing hides feels like
+ * being inside the game rather than on a separate page. */
+.lobby-stage { min-height: calc(var(--stage-vh) - 36px); }
+/* .game-stage is a flex column with its own gap — drop the children's own
+ * bottom margins so spacing doesn't double up. */
+.lobby-stage > .explore-toolbar,
+.lobby-stage > .explore-search-bar,
+.lobby-stage > .art-house-shelf,
+.lobby-stage > .explore-search-panel { margin-bottom: 0; }
+.lobby-stage > .explore-grid { flex: 1; min-height: 0; }
+/* Small project links live together at the Lobby's bottom-left (pushed down
+ * by the flex-1 grid). */
+.lobby-stage > .lobby-footer-links {
+  align-self: flex-start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin: 8px 2px 0;
+}
+/* Lane tabs are a phone-only affordance (see the max-width media query); desktop
+ * shows all three lanes side by side. */
+.lobby-tabs { display: none; }
+.lobby-tab {
+  flex: 1;
+  min-height: 40px;
+  border: 1px solid rgba(233, 216, 181, .2);
+  border-radius: 999px;
+  padding: 6px 10px;
+  color: #b7b0a4;
+  background: rgba(13, 17, 29, .5);
+  font: 900 11px/1 Inter, ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.lobby-tab.is-active { border-color: rgba(237, 207, 125, .7); color: #f4dda0; background: rgba(218, 177, 81, .14); }
+.explore-toolbar { display: flex; min-height: 44px; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; padding: 0 3px; }
+.explore-toolbar-actions { display: flex; align-items: center; justify-content: flex-end; gap: 10px; }
+.account-button {
+  min-height: 34px;
+  border: 1px solid rgba(237, 207, 125, .5);
+  border-radius: 999px;
+  padding: 6px 11px;
+  color: #edd58f;
+  background: rgba(218, 177, 81, .08);
+  font-size: 11px;
+  font-weight: 850;
+}
+.explore-status { margin: 0; color: #938c80; font-size: 11px; }
+.explore-status:empty { display: none; }
+.explore-search-bar {
+  position: relative;
+  display: flex;
+  width: min(100%, 430px);
+  margin: 0 0 10px auto;
+}
+.explore-search-bar input {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid rgba(232, 210, 158, .3);
+  border-radius: 999px;
+  padding-block: 9px;
+  padding-inline: 15px 42px;
+  color: #f1eadc;
+  background: rgba(13, 17, 29, .72);
+  outline: none;
+}
+.explore-search-bar input:focus { border-color: rgba(237, 207, 125, .75); box-shadow: 0 0 0 3px rgba(228, 189, 100, .09); }
+.explore-search-bar input::placeholder { color: #8f8980; }
+.explore-search-bar input::-webkit-search-cancel-button { appearance: none; }
+.explore-search-bar button {
+  position: absolute;
+  inset-block: 5px;
+  inset-inline-end: 5px;
+  width: 32px;
+  border: 0;
+  border-radius: 50%;
+  color: #d7c69b;
+  background: rgba(228, 189, 100, .1);
+}
+/* Horizontal slider: full house names fit, and more houses scroll into view. */
+.art-house-shelf { display: flex; gap: 10px; margin-bottom: 10px; padding-bottom: 6px; overflow-x: auto; scroll-snap-type: x proximity; overscroll-behavior-x: contain; }
+.art-house-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  flex: 0 0 clamp(238px, 76vw, 300px);
+  scroll-snap-align: start;
+  border: 1px solid rgba(232, 210, 158, .25);
+  border-radius: 14px;
+  padding: 6px;
+  color: #efe6d2;
+  background: linear-gradient(145deg, rgba(38, 40, 53, .96), rgba(16, 20, 32, .96));
+  text-align: left;
+}
+.art-house-card:hover { border-color: rgba(237, 205, 123, .58); }
+/* Locked paid house: dim the thumbnail and show a lock (+ price once checkout is live). */
+.art-house-card.is-locked img { opacity: .62; filter: saturate(.72); }
+.art-house-card .house-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #f4ead0;
+  background: rgba(12, 14, 22, .82);
+  border: 1px solid rgba(237, 205, 123, .45);
+  pointer-events: none;
+}
+.art-house-card img { width: 100%; height: 66px; border-radius: 10px; object-fit: cover; }
+.art-house-card span { display: flex; min-width: 0; flex-direction: column; gap: 4px; }
+.art-house-card strong { color: #f2e7ce; font-family: Georgia, serif; font-size: clamp(14px, 2vw, 18px); line-height: 1.15; }
+.art-house-card small { color: #d8b866; font-size: 10px; font-weight: 850; }
+/* "Seeking is always free" — a small reassurance under the room shelf. The
+   price and what-the-unlock-covers live in the checkout (payment) prompt, not
+   the Lobby; the per-card locks stay bare 🔒. */
+.unlock-all-note {
+  align-self: flex-start;
+  margin: 0 0 12px;
+  padding-left: 2px;
+  color: #a89e88;
+  font-size: 12px;
+  font-weight: 700;
+}
+.unlock-all-note[hidden] { display: none; }
+/* Confirm/explain modal shown before leaving for Stripe (reuses .auth-dialog +
+   .auth-card for the shell). */
+.unlock-card { text-align: center; }
+.unlock-card h2 { margin: 0 0 8px; font-family: Georgia, serif; }
+.unlock-blurb { margin: 0 0 18px; color: #cabfa8; font-size: 14px; line-height: 1.45; }
+.unlock-card .primary-button { width: 100%; margin: 0 0 8px; }
+.unlock-card .quiet-button { width: 100%; }
+.explore-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.explore-lane {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 300px;
+  overflow: hidden;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: linear-gradient(155deg, rgba(33, 36, 54, .97), rgba(16, 21, 34, .98));
+  box-shadow: 0 20px 60px rgba(0, 0, 0, .2);
+}
+.explore-lane h2 { margin: 0 0 10px; color: #d8b866; font: 900 10px/1.2 Inter, ui-sans-serif, system-ui, sans-serif; letter-spacing: .16em; text-transform: uppercase; }
+/* Lane header: title on the left, a from-cache refresh (↻) on the right. */
+.lane-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+.lane-head h2 { margin: 0; }
+.lane-refresh {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border: 1px solid rgba(233, 216, 181, .22);
+  border-radius: 999px;
+  color: #cdb271;
+  background: rgba(13, 17, 29, .5);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  transition: color .2s ease, border-color .2s ease;
+}
+.lane-refresh:hover { color: #f0d88c; border-color: rgba(237, 207, 125, .55); }
+.lane-refresh.is-spinning { animation: lane-spin .5s ease; }
+@keyframes lane-spin { to { transform: rotate(360deg); } }
+.challenge-list { display: flex; flex-direction: column; gap: 8px; }
+/* As rooms grow, the lane scrolls its cards instead of clipping them. */
+/* The first card can lift 2px on hover/focus. Keep a small scrollport inset
+ * so that gold selection edge is never clipped by the lane's top boundary. */
+.explore-lane > .challenge-list { flex: 1; min-height: 0; overflow-y: auto; padding: 3px 2px 0 0; }
+.challenge-link {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 54px;
+  padding: 10px 12px;
+  border: 1px solid rgba(232, 210, 158, .28);
+  border-radius: 12px;
+  color: #d6cfc1;
+  background: linear-gradient(145deg, rgba(38, 40, 53, .96), rgba(16, 20, 32, .96));
+  text-decoration: none;
+  transition: border-color .15s ease, transform .15s ease, background .15s ease;
+}
+.challenge-thumb-wrap, .account-room-thumb-wrap { position: relative; flex: none; width: 58px; height: 42px; }
+.challenge-thumb { width: 58px; height: 42px; border-radius: 8px; object-fit: cover; }
+.challenge-link:hover { transform: translateY(-2px); border-color: rgba(237, 205, 123, .55); background: rgba(31, 32, 43, .92); }
+.challenge-link strong { color: #f0d483; font-size: 14px; }
+.challenge-link span { color: #89847c; font-size: 10px; text-align: right; }
+.challenge-empty { margin: 0; padding: 13px; border: 1px dashed rgba(230, 208, 160, .17); border-radius: 12px; color: #8f8980; font-size: 11px; }
+.explore-search-panel { margin-bottom: 10px; padding: 12px; border: 1px solid var(--line); border-radius: 15px; background: rgba(18, 22, 36, .72); }
+.explore-search-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.challenge-copy { display: flex; min-width: 0; flex-direction: column; gap: 4px; }
+.challenge-copy strong { color: #f1e5cb; font: 600 14px/1.2 Georgia, serif; overflow-wrap: anywhere; }
+.challenge-copy small { color: #e0c36f; font-size: 10px; font-weight: 850; }
+.manage-room-identity { margin: 0 34px 10px 0; }
+.manage-room-line { display: flex; flex-wrap: wrap; align-items: baseline; gap: 5px; margin: 0 0 3px; color: #b9b1a4; font-size: 12px; }
+.manage-room-name { color: #f1dfac; font: 600 24px/1.1 Georgia, serif; overflow-wrap: anywhere; }
+.manage-room-hint { display: block; color: #918b83; font-size: 11px; line-height: 1.35; }
+
+.auth-dialog {
+  width: min(430px, calc(100% - 24px));
+  max-width: none;
+  max-height: calc(100dvh - 28px);
+  overflow: auto;
+  border: 1px solid rgba(237, 207, 125, .44);
+  border-radius: 20px;
+  padding: 0;
+  color: #f5eddb;
+  background: #171b2c;
+  box-shadow: 0 30px 100px #000b;
+}
+.auth-dialog::backdrop { background: rgba(7, 10, 18, .72); backdrop-filter: blur(4px); }
+.auth-card { position: relative; padding: 28px; }
+
+/* Share/manage modal — overlays the Lobby after publishing. */
+.manage-dialog {
+  width: min(460px, calc(100% - 24px));
+  max-width: none;
+  max-height: calc(100dvh - 32px);
+  border: 1px solid rgba(237, 207, 125, .44);
+  border-radius: 20px;
+  padding: 0;
+  overflow: auto;
+  color: #f5eddb;
+  background: linear-gradient(152deg, rgba(30, 32, 48, .99), rgba(17, 21, 35, .99));
+  box-shadow: 0 30px 100px #000b;
+}
+.manage-dialog::backdrop { background: rgba(7, 10, 18, .72); backdrop-filter: blur(4px); }
+.manage-card { position: relative; padding: clamp(18px, 3vw, 26px); }
+/* Share row: standalone QR beside the link + button; wraps (QR on top) on narrow. */
+.share-block { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 16px; margin-top: 4px; }
+.share-qr { flex: none; width: 116px; height: 116px; border-radius: 12px; background: #fff; padding: 6px; box-shadow: 0 6px 18px rgba(0, 0, 0, .3); }
+.share-controls { flex: 1 1 190px; min-width: 180px; display: flex; flex-direction: column; gap: 10px; }
+.share-controls .share-cta { margin-top: 0; }
+.auth-card h2 { margin: 0 32px 8px 0; color: #f3e5c5; font-size: 29px; }
+.auth-card p { margin: 0 0 17px; color: #aaa295; font-size: 13px; }
+.auth-card form { display: grid; gap: 9px; }
+.auth-card input {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid #575668;
+  border-radius: 11px;
+  padding: 11px 13px;
+  color: #f5eddb;
+  background: #0f1423;
+}
+.auth-close { position: absolute; top: 9px; right: 11px; border: 0; padding: 4px 8px; color: #c9c1b5; background: transparent; font-size: 28px; }
+.auth-status { min-height: 18px; margin-top: 11px !important; color: #d8bd72 !important; }
+#auth-signed-in { display: grid; gap: 9px; }
+#auth-signed-in p { overflow-wrap: anywhere; }
+
+/* "My rooms" list inside the signed-in modal. */
+.account-rooms { margin: 2px 0 4px; }
+.account-rooms-title { margin: 0 0 8px; color: #d8b866; font: 900 10px/1.2 Inter, ui-sans-serif, system-ui, sans-serif; letter-spacing: .16em; text-transform: uppercase; }
+.account-rooms-list { display: flex; flex-direction: column; gap: 10px; max-height: 46vh; overflow-y: auto; }
+.account-rooms-note { margin: 0; padding: 12px; border: 1px dashed rgba(230, 208, 160, .17); border-radius: 12px; color: #8f8980; font-size: 12px; }
+.account-room { padding: 12px; border: 1px solid rgba(232, 210, 158, .16); border-radius: 12px; background: rgba(13, 17, 29, .5); }
+.account-room-head { display: flex; align-items: center; gap: 10px; }
+.account-room-thumb-wrap { width: 54px; height: 40px; }
+.account-room-thumb { width: 54px; height: 40px; border-radius: 8px; object-fit: cover; }
+.account-room-meta { display: flex; flex: 1; flex-direction: column; gap: 2px; min-width: 0; }
+.account-room-meta strong { color: #f1e5cb; font: 600 15px/1.15 Georgia, serif; }
+.account-room-meta small { color: #918d88; font-size: 11px; }
+.account-room-copy { flex: none; width: 38px; min-height: 38px; border-radius: 9px; }
+/* "live painting" — a small text line under the room/house name (lobby cards,
+   the room shelf, the manage modal). Never overlaid on the artwork. Placed
+   after the per-card `small` rules above so it wins the specificity tie. */
+small.live-painting-note {
+  display: block;
+  margin: 0 0 4px;
+  color: #cbb06a;
+  font: 850 9px/1.3 Inter, ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: .05em;
+}
+.account-room-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 10px; }
+.account-room-stats div { padding: 7px 4px; border: 1px solid rgba(233, 215, 174, .12); border-radius: 8px; text-align: center; }
+.account-room-stats strong { display: block; color: #e8c976; font: 500 18px/1 Georgia, serif; font-variant-numeric: tabular-nums; }
+.account-room-stats span { display: block; margin-top: 3px; color: #918d88; font-size: 9px; text-transform: uppercase; letter-spacing: .05em; }
+.account-room-found { margin: 10px 0 0; }
+.account-room-found img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; border-radius: 10px; border: 1px solid rgba(233, 215, 174, .14); }
+.account-room-found figcaption { margin-top: 6px; color: #a9d7ac; font-size: 11px; font-weight: 700; text-align: center; }
+
+.admin-login-card { margin-bottom: 18px; }
+.admin-token-row { grid-template-columns: minmax(0, 1fr) auto; }
+.admin-grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(280px, .65fr); gap: 16px; }
+.admin-grid .play-card { margin: 0; }
+.admin-grid h2 { margin: 2px 0 18px; font-size: clamp(28px, 4vw, 40px); }
+.moderation-list { display: flex; flex-direction: column; gap: 10px; }
+.moderation-item, .moderation-audit-row { padding: 14px; border: 1px solid rgba(232, 210, 158, .17); border-radius: 12px; background: rgba(10, 14, 25, .5); }
+.moderation-item-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.moderation-item-heading a { color: #e6cb83; font-weight: 800; text-decoration: none; }
+.moderation-item-heading small { color: #817c74; }
+.moderation-item p { margin: 10px 0; color: var(--muted); font-size: 12px; }
+.moderation-audit-row { display: flex; flex-direction: column; gap: 5px; }
+.moderation-audit-row strong { color: #d9c47f; font-size: 12px; }
+.moderation-audit-row span { color: #817c74; font-size: 10px; }
+
+footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 28px max(24px, env(safe-area-inset-right, 0px)) max(38px, env(safe-area-inset-bottom, 0px)) max(24px, env(safe-area-inset-left, 0px));
+  border-top: 1px solid rgba(236, 217, 176, .11);
+  color: #716f72;
+  font-size: 11px;
+}
+
+/* Paint studio migrated from Snake Lab, with Code Brush and portal controls removed. */
+.paint-studio {
+  position: fixed;
+  z-index: 20000;
+  inset: 10px 10px 10px auto;
+  width: min(680px, 55vw);
+  color: #f5f0e2;
+  font-family: system-ui, -apple-system, sans-serif;
+  pointer-events: auto;
+}
+.paint-studio.hidden { display: none; }
+.paint-card {
+  height: 100%;
+  overflow: auto;
+  padding: 16px;
+  border: 1px solid #826f50;
+  border-radius: 18px;
+  background: linear-gradient(160deg, #191823, #0d111b);
+  box-shadow: 0 20px 70px #000c;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.paint-head, .paint-footer, .paint-row { display: flex; align-items: center; justify-content: space-between; gap: 9px; }
+.paint-head-actions { display: flex; align-items: center; gap: 7px; }
+.paint-live-toggle { min-width: 62px; text-transform: lowercase; }
+.paint-live-toggle.active { color: #181207 !important; background: linear-gradient(180deg, #f0d783, #d4aa4d) !important; }
+.paint-head small { color: #c7ae79; letter-spacing: .13em; font-weight: 800; }
+.paint-head h2 { margin: 2px 0 0; font-family: Georgia, serif; font-size: 25px; }
+.paint-studio button { cursor: pointer; }
+.paint-leave { white-space: nowrap; }
+.paint-close { border: 0 !important; background: transparent !important; color: #eee4cf !important; font-size: 32px !important; padding: 0 8px !important; }
+.paint-tip { color: #c9c4b8; font-size: 13px; line-height: 1.38; margin: 10px 0; }
+.paint-workspace { display: grid; grid-template-columns: minmax(260px, 1.15fr) minmax(180px, .85fr); gap: 13px; }
+.paint-canvas-wrap {
+  display: grid;
+  place-items: center;
+  min-height: min(44vh, 420px);
+  overflow: hidden;
+  border: 1px solid #5f5665;
+  border-radius: 14px;
+  background: radial-gradient(circle at 50% 40%, #494454, #22202c 62%, #15141c);
+}
+.paint-canvas-wrap canvas { width: 100%; height: 100%; touch-action: none; }
+/* The room reference (backdrop) fills the stack; the paint surface (chameleon)
+   is ZOOMED IN so it's big + easy to paint. The avatar is drawn 100px in the
+   960px world and the backdrop now shows a 125px crop, so the chameleon is
+   100/125 ≈ 80% of the canvas, centered — big for painting yet still naturally
+   proportioned against the room. Keep this % = 100/cropSide in sync with
+   `cropSide` in GameCanvas.roomBackdrop. */
+.paint-canvas-stack { position: relative; display: grid; place-items: center; width: min(100%, 460px); aspect-ratio: 1; }
+/* Crosshair (not the OS arrow) over the paper for both Paint and Live Brush —
+   the ring div previews the size; the crosshair marks the exact point. */
+.paint-canvas-stack > [data-paint-surface] { position: relative; z-index: 1; width: 80%; height: 80%; cursor: crosshair; }
+.paint-canvas-stack > [data-paint-backdrop] { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; pointer-events: none; border-radius: 10px; transition: opacity .18s ease; }
+.paint-canvas-stack > [data-paint-backdrop].has-backdrop { opacity: .5; }
+.chameleon-eyedropper #app canvas, .chameleon-eyedropper .paint-canvas-wrap canvas { cursor: crosshair; }
+.paint-eyedropper-indicator { position: fixed; z-index: 30000; width: 34px; height: 34px; pointer-events: none; opacity: 0; transform: translate(-5px, -29px); filter: drop-shadow(0 1px 2px #000a); }
+.paint-eyedropper-indicator.visible { opacity: .7; }
+.paint-eyedropper-indicator.picked { animation: eyedropper-picked .24s ease-out; }
+@keyframes eyedropper-picked { to { opacity: 0; transform: translate(-5px, -29px) scale(1.16); } }
+.paint-eyedropper-indicator svg { width: 100%; height: 100%; }
+.paint-eyedropper-indicator path { fill: rgba(33, 26, 44, .5); stroke: #fff8e8; stroke-width: 2; stroke-linejoin: round; }
+.paint-eyedropper-indicator .paint-eyedropper-glass { fill: rgba(227, 189, 103, .45); }
+.paint-brush-cursor {
+  position: fixed;
+  z-index: 30001;
+  width: var(--paint-brush-size, 26px);
+  height: var(--paint-brush-size, 26px);
+  border: 2px solid rgba(15, 143, 136, .86);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, .84),
+    0 8px 24px rgba(15, 96, 92, .16);
+  background: rgba(15, 143, 136, .08);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  transition: width .08s ease, height .08s ease, border-color .08s ease, background-color .08s ease;
+}
+.paint-brush-cursor.live {
+  border-color: rgba(227, 189, 103, .92);
+  background: rgba(227, 189, 103, .09);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, .84),
+    0 8px 24px rgba(174, 127, 40, .18);
+}
+.paint-brush-cursor::before,
+.paint-brush-cursor::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 7px;
+  height: 1px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .68);
+  box-shadow: 0 0 1px rgba(10, 13, 20, .8);
+  transform: translate(-50%, -50%);
+}
+.paint-brush-cursor::after { transform: translate(-50%, -50%) rotate(90deg); }
+.paint-brush-cursor.hidden { display: none; }
+/* The cursor-following dropper icon is a hover affordance; on touch the finger
+   IS the pointer, so it's meaningless (and hidden under the finger) — drop it. */
+@media (hover: none) and (pointer: coarse) {
+  .paint-eyedropper-indicator { display: none !important; }
+}
+.paint-tools { display: flex; flex-direction: column; gap: 7px; }
+.paint-tools label { color: #b9ae9d; font-size: 12px; font-weight: 700; }
+.paint-help { margin-top: -3px; color: #928a7f; font-size: 10px; line-height: 1.25; }
+.paint-tool-tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; margin-top: 2px; }
+.paint-tool-tabs button { border-radius: 999px; text-transform: lowercase; }
+.paint-tool-panel { display: flex; flex-direction: column; gap: 7px; }
+.live-brush-panel { padding: 9px; border: 1px solid rgba(227, 189, 103, .24); border-radius: 11px; background: rgba(227, 189, 103, .045); }
+.live-brush-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.live-brush-list button { min-height: 42px; line-height: 1.15; }
+.live-brush-sliders { display: grid; gap: 6px; }
+.live-brush-sliders > label { display: grid; grid-template-columns: 36px minmax(60px, 1fr); align-items: center; gap: 7px; }
+.live-brush-sliders > label > span { color: #bba872; font-size: 10px; font-weight: 800; text-transform: lowercase; }
+/* quiet ↔ live endpoints under the force slider (aligned with its track). */
+.live-strength-scale { display: flex; justify-content: space-between; margin-top: -4px; padding-left: 43px; color: #8f8877; font-size: 9px; font-weight: 800; text-transform: lowercase; }
+.paint-segment { display: flex; flex-wrap: wrap; gap: 5px; }
+.paint-studio button {
+  border: 1px solid #595262;
+  border-radius: 9px;
+  padding: 8px 10px;
+  color: #e9e2d4;
+  background: #2a2934;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+}
+.paint-studio button.active { border-color: #e3bd67; background: #5a4827; box-shadow: 0 0 0 1px #e3bd6755 inset; }
+.paint-studio button:disabled { cursor: default; opacity: .4; }
+.paint-palette { display: grid; grid-template-columns: repeat(5, 30px); gap: 6px; }
+.paint-palette button { width: 30px; height: 30px; padding: 0; border-radius: 50%; }
+.paint-palette button.active { transform: scale(1.14); box-shadow: 0 0 0 2px #fff, 0 0 0 4px #1a1820; }
+.paint-color-tools { display: flex; align-items: stretch; gap: 7px; }
+.paint-color-tools > button { flex: 1; }
+.paint-color-picker { display: flex; align-items: center; gap: 7px; min-width: 122px; padding: 5px 8px; border: 1px solid #595262; border-radius: 9px; background: #22212c; }
+.paint-color-picker input[type="color"] { width: 36px; height: 28px; padding: 0; border: 0; border-radius: 6px; background: transparent; cursor: pointer; }
+.paint-tools input[type="range"] { width: 100%; accent-color: #e3bd67; }
+.paint-stats { color: #9891a0; text-align: right; font-size: 11px; }
+/* Reset the global page-<footer> geometry (max-width, margin:0 auto, big
+ * safe-area padding) that would otherwise bleed into the studio's <footer>. */
+.paint-footer { margin: 12px 0 0; padding: 12px 0 0; max-width: none; }
+.paint-footer [data-paint-status] { flex: 1; color: #a9a29a; font-size: 11px; }
+.paint-footer [data-paint-status].ok { color: #79d69c; }
+.paint-footer [data-paint-status].bad { color: #ff8b8b; }
+.paint-lock { color: #211a0c !important; background: #e3bd67 !important; border-color: #f0d88c !important; font-size: 13px !important; }
+
+/* Wide screens: give the bottom control bar a little more presence, since the
+ * canvas above it now has the full width. */
+@media (min-width: 840px) {
+  .game-stage[data-stage] { --deck-h: 150px; }
+}
+
+/* Common laptop heights: shrink the bar so canvas + bar fit the fold. */
+@media (min-width: 840px) and (max-height: 830px) {
+  .game-stage[data-stage] { --deck-h: 128px; }
+  .game-stage[data-stage] .stage-main { gap: 10px; }
+}
+
+@media (max-width: 760px) {
+  .wordmark { font-size: 16px; }
+  .wordmark-mark { font-size: 23px; }
+  .page-shell { width: min(calc(100% - 20px), 1120px); margin-top: 10px; }
+  h1 { font-size: clamp(39px, 13vw, 61px); }
+  .lede { font-size: 15px; }
+  .play-card { border-radius: 18px; }
+  .canvas-shell { border-radius: 11px; }
+  .control-deck { grid-template-columns: 124px minmax(0, 1fr); gap: 7px; }
+  .movement-deck, .inspection-deck { min-height: 122px; border-radius: 11px; }
+  .movement-deck { padding: 8px; }
+  .joystick { width: 104px; height: 104px; }
+  .inspection-deck { padding: 7px; }
+  .inspection-heading { margin-bottom: 5px; }
+  .inspection-heading > span:last-child { display: none; }
+  .admin-token-row { grid-template-columns: 1fr; }
+  .admin-token-row input { grid-column: auto; }
+  .admin-grid { grid-template-columns: 1fr; }
+  .stats-grid div { padding: 14px 10px; }
+  /* Phone: lanes become tabs — show the bar and only the active lane, so the
+   * lobby frame is a fixed height (one scrollable lane) instead of a tall stack. */
+  .lobby-tabs { display: flex; gap: 8px; }
+  .explore-grid { display: block; grid-template-columns: 1fr; }
+  .explore-grid .explore-lane { display: none; }
+  .explore-grid .explore-lane.is-active { display: flex; height: 100%; }
+  .explore-search-bar { width: 100%; }
+  .explore-search-list { grid-template-columns: 1fr; }
+  .explore-lane { min-height: 0; }
+  .explore-toolbar { align-items: flex-start; flex-wrap: wrap; }
+  .explore-toolbar-actions { flex-flow: row wrap; align-items: center; margin-inline-start: auto; }
+  .explore-cta { width: 100%; margin-left: 0; }
+  .stage-panels .explore-cta { width: auto; margin-left: 0; }
+  .stage-footer-brand { flex-basis: 100%; }
+  .art-house-switcher { margin-inline-end: auto !important; }
+  .paint-studio { inset: 4px; width: auto; }
+  .paint-card { padding: 11px; border-radius: 12px; }
+  .paint-head { align-items: flex-start; }
+  .paint-head-actions .paint-leave { display: none; }
+  .paint-workspace { grid-template-columns: minmax(170px, 1fr) minmax(140px, .8fr); }
+  .paint-canvas-wrap { min-height: 210px; }
+  .paint-palette { grid-template-columns: repeat(4, 27px); }
+  .paint-palette button { width: 27px; height: 27px; }
+  .paint-color-tools { flex-direction: column; }
+  .paint-footer { flex-wrap: wrap; }
+  .paint-footer [data-paint-status] { flex-basis: 100%; }
+}
+
+/* Phone: the playable control bar stacks into clean full-width rows —
+ * joystick + Close Look side by side, then actions (Hider) or timer + stats
+ * (Seeker) — all within thumb reach under the canvas. */
+@media (max-width: 760px) {
+  .game-stage[data-stage] { --deck-h: 120px; }
+  /* Compact: the frame hugs its content (room + bar) instead of stretching to
+   * full-screen with big empty gaps around the small, width-bound room. The
+   * room canvas fills the width at 3:2; JS (fitPlayableCanvas) leaves the shell
+   * to CSS here. */
+  .game-stage[data-stage] { height: auto; }
+  .game-stage[data-stage] .stage-main { flex: 0 0 auto; grid-template-rows: auto auto; }
+  .game-stage[data-stage] .stage-viewport { display: block; }
+  .game-stage[data-stage] .canvas-shell { width: 100%; height: auto; aspect-ratio: 3 / 2; }
+  .game-stage[data-stage] .control-deck,
+  .game-stage[data-stage] .create-actions,
+  .game-stage[data-stage] #seeker-game > * { flex: 1 1 100%; }
+  .game-stage[data-stage] .movement-deck,
+  .game-stage[data-stage] .inspection-deck { flex: 1 1 0; width: auto; }
+  .game-stage[data-stage] .inspection-deck canvas { max-width: 100%; }
+  /* Paint + Hide go back side by side (full-width row) on phones. */
+  .game-stage[data-stage] .create-actions { flex-direction: row; width: 100%; height: auto; }
+  .game-stage[data-stage] .create-actions > * { min-height: 46px; }
+  .game-stage[data-stage] .game-status-row { flex-direction: row; height: auto; min-height: 46px; }
+  .game-stage[data-stage] .seek-stats { width: 100%; }
+}
+
+/* iPhone paint studio: pin the canvas at the top and scroll ONLY the tools, so
+ * the painting stays in view while you pick colors/brushes and the footer
+ * (Back / done hide) is always reachable — no scroll-to-paint churn. */
+@media (max-width: 440px) {
+  .paint-card { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+  /* Compact header so the tools get the room. */
+  .paint-head { flex: 0 0 auto; }
+  .paint-head h2 { font-size: 19px; }
+  .paint-head small { font-size: 10px; }
+  .paint-tip { display: none; }
+  .paint-workspace {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
+    flex: 1 1 auto;
+    min-height: 0;
+    gap: 8px;
+  }
+  /* Smaller paint canvas (was 42vh, too tall) — the freed height goes to the
+   * scrolling tools so palette + brush + size + undo are reachable. */
+  .paint-canvas-wrap { height: 30vh; min-height: 0; }
+  .paint-canvas-stack { width: min(100%, 30vh); }
+  .paint-tools {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding-right: 3px;
+  }
+  /* One compact footer row (was wrapping the status onto its own line and
+   * wasting ~80px). Status shrinks + truncates; the buttons stay on the row. */
+  .paint-footer { flex: 0 0 auto; flex-wrap: nowrap; align-items: center; gap: 8px; margin: 8px 0 0; padding: 10px 0 0; }
+  .paint-footer [data-paint-status] { flex: 1 1 auto; flex-basis: auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; }
+  .paint-footer .paint-back, .paint-footer .paint-lock { flex: 0 0 auto; }
+  /* Roomier touch targets while painting. */
+  .paint-segment { flex-wrap: wrap; }
+  .paint-segment button { padding: 9px 11px; font-size: 13px; }
+  /* Small dots in a FIXED 6-column grid. auto-fill needed the container width
+   * (measured wrong while the studio was still display:none on open → dots
+   * clipped until a reflow); a fixed count lays out right immediately and can't
+   * overflow (1fr columns). 12 colors → 2 tidy rows of 6. */
+  .paint-palette { grid-template-columns: repeat(6, 1fr); gap: 8px; }
+  .paint-palette button { width: 34px; height: 34px; justify-self: center; }
+  .paint-lock, .paint-back { padding: 11px 16px !important; font-size: 14px !important; }
+}
+
+/* Hider Studio owns the full usable viewport on landscape phones. Width-based
+ * phone rules miss modern 844px+ iPhones in landscape, so key this layout to a
+ * short coarse-pointer viewport instead. */
+@media (orientation: landscape) and (max-height: 560px) and (any-pointer: coarse) {
+  .paint-studio {
+    inset: 0;
+    width: 100vw;
+    height: 100dvh;
+  }
+  .paint-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    padding:
+      max(8px, env(safe-area-inset-top))
+      max(10px, env(safe-area-inset-right))
+      max(8px, env(safe-area-inset-bottom))
+      max(10px, env(safe-area-inset-left));
+    border: 0;
+    border-radius: 0;
+  }
+  .paint-head { flex: 0 0 auto; align-items: center; }
+  .paint-head h2 { font-size: 19px; }
+  .paint-head small { font-size: 9px; }
+  .paint-tip { display: none; }
+  .paint-workspace {
+    grid-template-columns: minmax(0, 1.15fr) minmax(250px, .85fr);
+    flex: 1 1 auto;
+    min-height: 0;
+    gap: 8px;
+  }
+  .paint-canvas-wrap { height: 100%; min-height: 0; }
+  .paint-canvas-stack {
+    width: min(100%, calc(100dvh - 104px));
+    max-height: 100%;
+  }
+  .paint-tools {
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding-right: 3px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .paint-footer {
+    flex: 0 0 auto;
+    flex-wrap: nowrap;
+    margin-top: 6px;
+    padding-top: 6px;
+  }
+  .paint-footer [data-paint-status] {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+/* Any short viewport (landscape phones, squat iframes): a 3:2 canvas plus a
+ * controls-below bar is tight on height, so trim chrome — hide the decorative
+ * title, shrink the bar, and keep the bottom panels to a single horizontal
+ * scroll row instead of wrapping — leaving the canvas as much height as it can
+ * get. Last in the file so it wins over the phone block for short + narrow. */
+@media (max-height: 560px) {
+  .page-shell { margin: 6px auto 24px; }
+  /* Landscape phones: the expiry used to own a third auto-sized grid column,
+   * squeezing two-word room names down to one letter per line. Put metadata
+   * below the name so the title receives the full width beside the thumbnail. */
+  .challenge-link {
+    grid-template-columns: 58px minmax(0, 1fr);
+    grid-template-areas:
+      "thumb copy"
+      "thumb meta";
+    row-gap: 3px;
+  }
+  .challenge-thumb-wrap { grid-area: thumb; }
+  .challenge-copy { grid-area: copy; }
+  .challenge-copy strong { overflow-wrap: normal; word-break: normal; hyphens: none; }
+  .challenge-link > .challenge-meta {
+    grid-area: meta;
+    min-width: 0;
+    overflow: hidden;
+    text-align: left;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .game-stage[data-stage] {
+    --deck-h: 88px;
+    height: calc(var(--stage-vh) - 16px);
+    gap: 8px;
+    padding: 8px 12px;
+  }
+  .game-stage[data-stage] .stage-brand-row { min-height: 20px; }
+  .game-stage[data-stage] .stage-brand-row .wordmark { font-size: 15px; }
+  .game-stage[data-stage] .stage-brand-row .wordmark-mark { font-size: 20px; }
+  .game-stage[data-stage] .canvas-title { display: none; }
+  .game-stage[data-stage] .movement-deck .joystick { width: 72px; height: 72px; }
+  .game-stage[data-stage] .stage-panels {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding-bottom: max(2px, env(safe-area-inset-bottom, 0px));
+  }
+  .game-stage[data-stage] .art-house-switcher { flex-wrap: nowrap; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .needs-attention::before { animation: none; }
+  .paint-canvas-stack > [data-paint-backdrop] { transition: none; }
+  .view { animation: none; }
+  .canvas-shell.is-miss { animation: none; }
+  .joystick-knob { transition: none; }
+  #seeker-game { transition: none; }
+  .explore-cta { transition: none; }
+  .game-action-button { transition: none; }
+  .ready-panel { backdrop-filter: none; }
+  .lane-refresh.is-spinning { animation: none; }
+}
+
+/* ---- TRUE full-screen, everything-on-canvas play surface ---------------- *
+ * The hider + seeker play views are a single canvas that fills the WHOLE
+ * viewport — no shell max-width, no stage frame (border/radius/padding). The
+ * wordmark, language, joystick, Close Look, HUD, buttons and overlays are all
+ * on the canvas (GameCanvas). Placed last so it wins the height/frame battle
+ * with the earlier .game-stage + [data-stage] rules. */
+.page-shell:has(> .view:not([hidden]) > .play-stage) {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+.game-stage.play-stage {
+  height: 100vh;
+  height: 100dvh;
+  padding: 0;
+  gap: 0;
+  border: 0;
+  border-radius: 0;
+  background: #0a0d18;
+  box-shadow: none;
+}
+.play-viewport {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+.play-viewport > canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  border-radius: 0;
+  background: #0a0d18;
+  cursor: pointer;
+}
+/* Language select floats over the top-right of the full-screen canvas (the DOM
+ * header row is gone). Kept as a native <select> for accessible 16-locale
+ * switching; styled as a subtle pill so it reads as part of the surface. */
+.canvas-locale {
+  position: absolute;
+  z-index: 7;
+  top: 12px;
+  right: 12px;
+  width: 86px;
+  max-width: min(86px, 42vw);
+  background: rgba(13, 16, 26, .72);
+  border-color: rgba(239, 217, 168, .3);
+  color: #f0e4c8;
+  backdrop-filter: blur(2px);
+}
+/* Loading overlay: the real flat-pose chameleon arrives first. Soft pigment
+ * blooms then grow and mingle on its ivory body like wet paint on paper. The
+ * 68–96px mark stays filter-free, crisp, and inexpensive to composite. */
+.canvas-loader {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(47, 72, 85, .2), transparent 32%),
+    rgba(9, 12, 20, .62);
+}
+.canvas-loader[hidden] { display: none; }
+.canvas-loader-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  transform: translateY(8px);
+}
+.canvas-loader-glyph {
+  width: clamp(68px, 18vw, 96px);
+  height: clamp(68px, 18vw, 96px);
+  overflow: visible;
+  filter: drop-shadow(0 7px 10px rgba(0, 0, 0, .42));
+}
+.canvas-loader-label {
+  margin-top: -10px;
+  color: #f2e7ce;
+  font: 700 clamp(11px, 1.2vw, 13px)/1.2 Georgia, serif;
+  letter-spacing: .08em;
+  text-shadow: 0 2px 12px #000;
+  animation: loader-painting-heartbeat 2.8s linear infinite;
+}
+.loader-art-defs {
+  position: absolute;
+  overflow: hidden;
+}
+.loader-chameleon-body {
+  animation: loader-heartbeat 2.8s linear infinite;
+  transform-box: fill-box;
+  transform-origin: 52% 70%;
+}
+.loader-breath-aura {
+  opacity: calc(.62 * var(--loader-art-ready, 0));
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: loader-aura-heartbeat 2.8s linear infinite;
+}
+/* The tiny inline sketch is the zero-request first paint. main.ts replaces it
+ * in-place as soon as the high-priority flat.png decode finishes. */
+.loader-sketch { opacity: calc(1 - var(--loader-art-ready, 0)); }
+.loader-avatar-art,
+.loader-avatar-eye,
+.loader-live-paint {
+  opacity: var(--loader-art-ready, 0);
+}
+.loader-avatar-art { opacity: var(--loader-art-ready, 0); }
+.loader-pigment-heart {
+  animation: loader-pigment-heartbeat 2.8s linear infinite;
+}
+.loader-pigment-bloom,
+.loader-wet-light {
+  transform-box: fill-box;
+  transform-origin: center;
+  will-change: transform, opacity;
+}
+.loader-pigment-bloom {
+  opacity: .62;
+  mix-blend-mode: multiply;
+}
+.loader-bloom-head {
+  animation: loader-bloom-head 2.8s linear infinite;
+}
+.loader-bloom-crown {
+  animation: loader-bloom-crown 2.8s linear infinite;
+}
+.loader-bloom-back {
+  animation: loader-bloom-back 2.8s linear infinite;
+}
+.loader-bloom-belly {
+  animation: loader-bloom-belly 2.8s linear infinite;
+}
+.loader-bloom-tail {
+  animation: loader-bloom-tail 2.8s linear infinite;
+}
+.loader-wet-light {
+  opacity: .38;
+  mix-blend-mode: screen;
+  animation: loader-wet-light 2.8s linear infinite;
+}
+/* Function Brush heartbeat: two quick beats followed by a quiet rest. */
+@keyframes loader-heartbeat {
+  0%, 6%, 17%, 27%, 100% { transform: translateY(2px) scale(.986, .978); }
+  10% { transform: translateY(-2px) scale(1.018, 1.026); }
+  21% { transform: translateY(-1px) scale(1.009, 1.016); }
+}
+@keyframes loader-aura-heartbeat {
+  0%, 6%, 17%, 27%, 100% { opacity: calc(.22 * var(--loader-art-ready, 0)); transform: scale(.88, .84); }
+  10% { opacity: calc(.7 * var(--loader-art-ready, 0)); transform: scale(1.08, 1.04); }
+  21% { opacity: calc(.5 * var(--loader-art-ready, 0)); transform: scale(1.01, .98); }
+}
+@keyframes loader-pigment-heartbeat {
+  0%, 6%, 17%, 27%, 100% { opacity: .7; }
+  10% { opacity: 1; }
+  21% { opacity: .86; }
+}
+@keyframes loader-bloom-head {
+  0%, 6% { opacity: .34; transform: translate(-7%, 5%) rotate(-4deg) scale(.72, .8); }
+  10% { opacity: .88; transform: translate(0, -2%) rotate(1deg) scale(1.12, 1.04); }
+  17% { opacity: .46; transform: translate(4%, 1%) rotate(3deg) scale(.88, 1.02); }
+  21% { opacity: .76; transform: translate(7%, -1%) rotate(4deg) scale(1.03, 1.12); }
+  27% { opacity: .5; transform: translate(8%, 1%) rotate(4deg) scale(.88, 1.08); }
+  100% { opacity: .34; transform: translate(-7%, 5%) rotate(-4deg) scale(.72, .8); }
+}
+@keyframes loader-bloom-crown {
+  0%, 6% { opacity: .3; transform: translate(5%, -4%) rotate(5deg) scale(.76, .68); }
+  10% { opacity: .78; transform: translate(-1%, 1%) rotate(-1deg) scale(1.06, 1.12); }
+  17% { opacity: .4; transform: translate(-5%, 4%) rotate(-4deg) scale(.9, .82); }
+  21% { opacity: .7; transform: translate(-8%, 1%) rotate(-5deg) scale(1.08, .98); }
+  27% { opacity: .44; transform: translate(-8%, 5%) rotate(-5deg) scale(.9, .82); }
+  100% { opacity: .3; transform: translate(5%, -4%) rotate(5deg) scale(.76, .68); }
+}
+@keyframes loader-bloom-back {
+  0%, 6% { opacity: .36; transform: translate(-8%, 1%) rotate(-3deg) scale(.78, .9); }
+  10% { opacity: .82; transform: translate(1%, -3%) rotate(2deg) scale(1.14, 1.05); }
+  17% { opacity: .46; transform: translate(6%, 2%) rotate(4deg) scale(.91, .8); }
+  21% { opacity: .76; transform: translate(9%, -1%) rotate(5deg) scale(1.08, .96); }
+  27% { opacity: .48; transform: translate(9%, 4%) rotate(5deg) scale(.86, .76); }
+  100% { opacity: .36; transform: translate(-8%, 1%) rotate(-3deg) scale(.78, .9); }
+}
+@keyframes loader-bloom-belly {
+  0%, 6% { opacity: .28; transform: translate(6%, 4%) rotate(3deg) scale(.7, .78); }
+  10% { opacity: .72; transform: translate(-1%, -2%) rotate(-1deg) scale(1.08, 1.12); }
+  17% { opacity: .38; transform: translate(-5%, 0) rotate(-3deg) scale(.88, .9); }
+  21% { opacity: .68; transform: translate(-8%, -2%) rotate(-4deg) scale(1.05, 1.04); }
+  27% { opacity: .4; transform: translate(-7%, 1%) rotate(-4deg) scale(.9, .86); }
+  100% { opacity: .28; transform: translate(6%, 4%) rotate(3deg) scale(.7, .78); }
+}
+@keyframes loader-bloom-tail {
+  0%, 6% { opacity: .32; transform: translate(-6%, -2%) rotate(-6deg) scale(.72); }
+  10% { opacity: .86; transform: translate(1%, 3%) rotate(1deg) scale(1.14); }
+  17% { opacity: .43; transform: translate(5%, 0) rotate(4deg) scale(.9); }
+  21% { opacity: .78; transform: translate(7%, 2%) rotate(6deg) scale(1.08, 1.14); }
+  27% { opacity: .45; transform: translate(7%, -1%) rotate(6deg) scale(.84, .96); }
+  100% { opacity: .32; transform: translate(-6%, -2%) rotate(-6deg) scale(.72); }
+}
+@keyframes loader-wet-light {
+  0%, 6% { opacity: .12; transform: translate(-38px, 16px) scale(.52, .68); }
+  10% { opacity: .58; transform: translate(-4px, -8px) scale(1.06, .88); }
+  17% { opacity: .2; transform: translate(24px, 3px) scale(.72, .6); }
+  21% { opacity: .48; transform: translate(42px, -3px) scale(.94, .76); }
+  27% { opacity: .18; transform: translate(54px, 9px) scale(.66, .54); }
+  100% { opacity: .12; transform: translate(-38px, 16px) scale(.52, .68); }
+}
+@keyframes loader-painting-heartbeat {
+  0%, 6%, 17%, 27%, 100% { opacity: .58; transform: translateY(1px); }
+  10% { opacity: 1; transform: translateY(-1px); }
+  21% { opacity: .82; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .loader-chameleon-body,
+  .loader-breath-aura,
+  .loader-pigment-heart,
+  .loader-pigment-bloom,
+  .loader-wet-light,
+  .canvas-loader-label { animation: none; }
+  .loader-pigment-heart { opacity: .68; }
+}
+/* Report is the one small DOM overlay in the play view (opened by the on-canvas
+ * Report button), like the paint studio. */
+.report-overlay {
+  position: fixed;
+  z-index: 900;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  width: min(360px, calc(100% - 24px));
+  border: 1px solid rgba(233, 215, 174, .22);
+  border-radius: 14px;
+  background: rgba(16, 20, 32, .98);
+  box-shadow: 0 20px 60px #000b;
+}
+.report-overlay[hidden] { display: none; }
+.report-overlay > summary { padding: 11px 14px; color: #cbbfa6; font-size: 12px; font-weight: 800; cursor: pointer; }
+
+/* The publish bot-check (Turnstile, interaction-only) sits as a fixed bottom-
+ * center overlay in the create view, so it never disturbs the on-canvas layout
+ * and only takes space if it actually needs to render. */
+.turnstile-overlay {
+  position: fixed;
+  z-index: 950;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  width: min(360px, calc(100% - 24px));
+  margin: 0;
+}
+.turnstile-overlay:empty { display: none; }

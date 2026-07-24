@@ -1,0 +1,671 @@
+{
+  "format": "chameleon-room-layout@1",
+  "roomId": "outdoor-masters-journey",
+  "layoutVariant": 0,
+  "props": [
+    {
+      "id": "outdoor-fauvist-chair",
+      "modelId": "rattan-armchair",
+      "x": 2320,
+      "y": 448,
+      "rotation": 0,
+      "accent": 2,
+      "artId": "outdoor-fauvist-rattan-chair-side-v1"
+    },
+    {
+      "id": "outdoor-fauvist-chair-added",
+      "modelId": "rattan-armchair",
+      "x": 2368,
+      "y": 424,
+      "rotation": 0,
+      "accent": 2,
+      "artId": "outdoor-fauvist-rattan-chair-v1"
+    },
+    {
+      "id": "outdoor-fauvist-easel",
+      "modelId": "tripod-easel",
+      "x": 2549.3,
+      "y": 379.5,
+      "rotation": 0,
+      "accent": 1,
+      "artId": "outdoor-fauvist-tripod-easel-v1"
+    },
+    {
+      "id": "outdoor-monet-chair",
+      "modelId": "rattan-armchair",
+      "x": 1524.9,
+      "y": 428.6,
+      "rotation": 180,
+      "accent": 2,
+      "artId": "outdoor-fauvist-monet-chair-v1"
+    },
+    {
+      "id": "outdoor-monet-etagere-added",
+      "modelId": "flower-etagere",
+      "x": 1184,
+      "y": 584,
+      "rotation": 0,
+      "accent": 1,
+      "collision": {
+        "padLeft": 1,
+        "padRight": 0,
+        "padFront": 0,
+        "padBack": 0
+      },
+      "artId": "outdoor-fauvist-monet-etagere-v1"
+    },
+    {
+      "id": "outdoor-monet-table",
+      "modelId": "round-pedestal-table",
+      "x": 1432,
+      "y": 440,
+      "rotation": 0,
+      "accent": 1,
+      "depthBias": -10,
+      "artId": "outdoor-fauvist-monet-table-v1"
+    },
+    {
+      "id": "outdoor-monet-vase",
+      "modelId": "sunflower-vase",
+      "x": 1432,
+      "y": 368,
+      "rotation": 0,
+      "accent": 1,
+      "depthBias": 80,
+      "artId": "outdoor-fauvist-monet-vase-v1"
+    },
+    {
+      "id": "outdoor-vg-brushes",
+      "modelId": "tall-brush-jar",
+      "x": 537.1,
+      "y": 509.3,
+      "rotation": 0,
+      "accent": 1,
+      "artId": "outdoor-fauvist-vangogh-brush-jar-v1"
+    },
+    {
+      "id": "outdoor-vg-chair",
+      "modelId": "chair-oak",
+      "x": 392,
+      "y": 392,
+      "rotation": 0,
+      "accent": 0,
+      "artId": "outdoor-fauvist-vangogh-oak-chair-v1"
+    },
+    {
+      "id": "outdoor-vg-crate",
+      "modelId": "painter-crate",
+      "x": 385.6,
+      "y": 530.6,
+      "rotation": 0,
+      "accent": 1,
+      "artId": "outdoor-fauvist-vangogh-painter-crate-v1"
+    },
+    {
+      "id": "outdoor-vg-easel",
+      "modelId": "tripod-easel",
+      "x": 457.6,
+      "y": 477.3,
+      "rotation": 180,
+      "accent": 1,
+      "artId": "outdoor-fauvist-vangogh-easel-v1"
+    },
+    {
+      "id": "outdoor-vg-stool-added",
+      "modelId": "round-stool",
+      "x": 2515.8,
+      "y": 414.3,
+      "rotation": 0,
+      "accent": 1,
+      "artId": "outdoor-fauvist-round-stool-v1"
+    },
+    {
+      "id": "outdoor-vg-vase",
+      "modelId": "sunflower-vase",
+      "x": 392,
+      "y": 352,
+      "rotation": 0,
+      "accent": 1,
+      "depthBias": 50,
+      "artId": "outdoor-fauvist-vangogh-sunflower-vase-v1"
+    }
+  ],
+  "portals": [
+    {
+      "id": "parlor-studio",
+      "leftEntry": {
+        "x": 824,
+        "y": 346.1,
+        "w": 122,
+        "h": 220
+      },
+      "rightEntry": {
+        "x": 992,
+        "y": 80,
+        "w": 166,
+        "h": 228
+      },
+      "leftExit": {
+        "x": 808,
+        "y": 456
+      },
+      "rightExit": {
+        "x": 1080,
+        "y": 400
+      },
+      "leftOpening": [
+        {
+          "x": 890,
+          "y": 246
+        },
+        {
+          "x": 954,
+          "y": 264
+        },
+        {
+          "x": 954,
+          "y": 512
+        },
+        {
+          "x": 854,
+          "y": 468
+        }
+      ],
+      "rightOpening": [
+        {
+          "x": 966,
+          "y": 264
+        },
+        {
+          "x": 1048,
+          "y": 336
+        },
+        {
+          "x": 1066,
+          "y": 468
+        },
+        {
+          "x": 966,
+          "y": 512
+        }
+      ],
+      "leftThreshold": [
+        {
+          "x": 854,
+          "y": 468
+        },
+        {
+          "x": 954,
+          "y": 512
+        },
+        {
+          "x": 954,
+          "y": 530
+        },
+        {
+          "x": 864,
+          "y": 484
+        }
+      ],
+      "rightThreshold": [
+        {
+          "x": 966,
+          "y": 512
+        },
+        {
+          "x": 1066,
+          "y": 468
+        },
+        {
+          "x": 1056,
+          "y": 484
+        },
+        {
+          "x": 966,
+          "y": 530
+        }
+      ],
+      "rightEntryShape": [
+        {
+          "x": 976,
+          "y": 224
+        },
+        {
+          "x": 1128,
+          "y": 176
+        },
+        {
+          "x": 1080,
+          "y": 328
+        },
+        {
+          "x": 1072,
+          "y": 504
+        },
+        {
+          "x": 976,
+          "y": 448
+        }
+      ]
+    },
+    {
+      "id": "studio-bedroom",
+      "leftEntry": {
+        "x": 1688,
+        "y": 392,
+        "w": 216,
+        "h": 212
+      },
+      "rightEntry": {
+        "x": 2008,
+        "y": 32,
+        "w": 204,
+        "h": 220
+      },
+      "leftExit": {
+        "x": 1652.1,
+        "y": 464
+      },
+      "rightExit": {
+        "x": 2136,
+        "y": 296
+      },
+      "leftOpening": [
+        {
+          "x": 1850,
+          "y": 246
+        },
+        {
+          "x": 1914,
+          "y": 264
+        },
+        {
+          "x": 1914,
+          "y": 512
+        },
+        {
+          "x": 1814,
+          "y": 468
+        }
+      ],
+      "rightOpening": [
+        {
+          "x": 1926,
+          "y": 264
+        },
+        {
+          "x": 2032,
+          "y": 296
+        },
+        {
+          "x": 2056,
+          "y": 416
+        },
+        {
+          "x": 1926,
+          "y": 512
+        }
+      ],
+      "leftThreshold": [
+        {
+          "x": 1814,
+          "y": 468
+        },
+        {
+          "x": 1914,
+          "y": 512
+        },
+        {
+          "x": 1914,
+          "y": 530
+        },
+        {
+          "x": 1824,
+          "y": 484
+        }
+      ],
+      "rightThreshold": [
+        {
+          "x": 1926,
+          "y": 512
+        },
+        {
+          "x": 2026,
+          "y": 468
+        },
+        {
+          "x": 2024,
+          "y": 496
+        },
+        {
+          "x": 1926,
+          "y": 530
+        }
+      ],
+      "rightEntryShape": [
+        {
+          "x": 2080,
+          "y": 64
+        },
+        {
+          "x": 2176,
+          "y": 72
+        },
+        {
+          "x": 2284,
+          "y": 64
+        },
+        {
+          "x": 2264,
+          "y": 240
+        },
+        {
+          "x": 2160,
+          "y": 272
+        },
+        {
+          "x": 2096,
+          "y": 256
+        }
+      ]
+    }
+  ],
+  "floor": [
+    [
+      {
+        "x": 264,
+        "y": 240
+      },
+      {
+        "x": 493.5,
+        "y": 215.9
+      },
+      {
+        "x": 765.1,
+        "y": 292.9
+      },
+      {
+        "x": 850.1,
+        "y": 217.6
+      },
+      {
+        "x": 816,
+        "y": 192.1
+      },
+      {
+        "x": 858.8,
+        "y": 140.1
+      },
+      {
+        "x": 898.5,
+        "y": 129.6
+      },
+      {
+        "x": 919.1,
+        "y": 154.8
+      },
+      {
+        "x": 920.4,
+        "y": 256.2
+      },
+      {
+        "x": 824.3,
+        "y": 341.2
+      },
+      {
+        "x": 931.1,
+        "y": 424.2
+      },
+      {
+        "x": 936,
+        "y": 600
+      },
+      {
+        "x": 236.5,
+        "y": 597.2
+      },
+      {
+        "x": 256.6,
+        "y": 577.6
+      },
+      {
+        "x": 276.7,
+        "y": 557.9
+      },
+      {
+        "x": 283.8,
+        "y": 505.7
+      },
+      {
+        "x": 193.8,
+        "y": 503
+      },
+      {
+        "x": 120.3,
+        "y": 537
+      },
+      {
+        "x": 88.9,
+        "y": 518.7
+      },
+      {
+        "x": 73,
+        "y": 451.1
+      },
+      {
+        "x": 112,
+        "y": 376
+      }
+    ],
+    [
+      {
+        "x": 974.4,
+        "y": 451.2
+      },
+      {
+        "x": 971.9,
+        "y": 372.6
+      },
+      {
+        "x": 1040,
+        "y": 320
+      },
+      {
+        "x": 1102.1,
+        "y": 287.9
+      },
+      {
+        "x": 1034.3,
+        "y": 208.3
+      },
+      {
+        "x": 1128,
+        "y": 176
+      },
+      {
+        "x": 1240,
+        "y": 264
+      },
+      {
+        "x": 1464,
+        "y": 224
+      },
+      {
+        "x": 1488,
+        "y": 184
+      },
+      {
+        "x": 1496,
+        "y": 128
+      },
+      {
+        "x": 1568,
+        "y": 128
+      },
+      {
+        "x": 1568,
+        "y": 192
+      },
+      {
+        "x": 1536,
+        "y": 232
+      },
+      {
+        "x": 1687.6,
+        "y": 269.2
+      },
+      {
+        "x": 1796.2,
+        "y": 256.4
+      },
+      {
+        "x": 1730.4,
+        "y": 179.3
+      },
+      {
+        "x": 1833.7,
+        "y": 140.7
+      },
+      {
+        "x": 1871.4,
+        "y": 226.6
+      },
+      {
+        "x": 1888,
+        "y": 600.8
+      },
+      {
+        "x": 992,
+        "y": 600
+      },
+      {
+        "x": 1048,
+        "y": 566
+      },
+      {
+        "x": 1092.9,
+        "y": 522.8
+      }
+    ],
+    [
+      {
+        "x": 2096,
+        "y": 448
+      },
+      {
+        "x": 1970.3,
+        "y": 379.6
+      },
+      {
+        "x": 2032,
+        "y": 288
+      },
+      {
+        "x": 2120,
+        "y": 240
+      },
+      {
+        "x": 2122.4,
+        "y": 192.6
+      },
+      {
+        "x": 2264,
+        "y": 240
+      },
+      {
+        "x": 2160,
+        "y": 336
+      },
+      {
+        "x": 2136,
+        "y": 408
+      },
+      {
+        "x": 2160,
+        "y": 432
+      },
+      {
+        "x": 2224,
+        "y": 392
+      },
+      {
+        "x": 2216,
+        "y": 368
+      },
+      {
+        "x": 2272,
+        "y": 336
+      },
+      {
+        "x": 2368,
+        "y": 312
+      },
+      {
+        "x": 2416,
+        "y": 280
+      },
+      {
+        "x": 2384,
+        "y": 256
+      },
+      {
+        "x": 2460.7,
+        "y": 247.4
+      },
+      {
+        "x": 2684.4,
+        "y": 283.7
+      },
+      {
+        "x": 2739.5,
+        "y": 354.3
+      },
+      {
+        "x": 2793.7,
+        "y": 352.6
+      },
+      {
+        "x": 2826.8,
+        "y": 379.5
+      },
+      {
+        "x": 2773.2,
+        "y": 429.1
+      },
+      {
+        "x": 2661.8,
+        "y": 554.5
+      },
+      {
+        "x": 2557.1,
+        "y": 545.3
+      },
+      {
+        "x": 2501.3,
+        "y": 594.3
+      },
+      {
+        "x": 1960,
+        "y": 600
+      },
+      {
+        "x": 2084.9,
+        "y": 538.7
+      }
+    ]
+  ],
+  "spawns": {
+    "hiderSpawn": {
+      "x": 144,
+      "y": 480
+    },
+    "seekerSpawn": {
+      "x": 2616,
+      "y": 472
+    },
+    "spectatorSpawn": {
+      "x": 112,
+      "y": 448
+    }
+  }
+}

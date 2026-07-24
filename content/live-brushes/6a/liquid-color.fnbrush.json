@@ -1,0 +1,24 @@
+{
+  "$schema": "https://lucasacademy.org/art-lab/schemas/function-brush-v1.schema.json",
+  "format": "lucas-function-brush",
+  "version": 1,
+  "id": "liquid-color",
+  "name": "Liquid Color",
+  "revision": "sha256:660cbb55a53e328adb07bd7882bf09cf5e39c4d12990becdc515af9d064eca33",
+  "source": "// Liquid Color — normal paint follows the production donor alpha-wave timing.\nconst FLOW = 2;\nconst SIZE = 30;\nconst FADE = 0;\nconst SPEED = 50;\nconst LINKS = 0;\nconst TERRITORY = 0;\nconst REBUILD_PHOTO = 1;\nconst PHOTO_OPACITY = 100;\nconst PHOTO_BLUR = 0;\n\nfunction ease(a, b, value) {\n  const x = Math.max(0, Math.min(1, (value - a) / (b - a)));\n  return x * x * (3 - 2 * x);\n}\n\nfunction brush(point, stroke, t) {\n  const marks = [];\n  for (let i = 0; i < FLOW; i += 1) {\n    const seed = point.index * 43 + i * 19 + stroke.seed * 89;\n    const c = photo(point.x, point.y, PHOTO_BLUR);\n    if (!c) continue;\n    marks.push({\n      x: point.x + (rand(seed) - .5) * SIZE * .42,\n      y: point.y + (rand(seed + 7) - .5) * SIZE * .42,\n      size: SIZE * (.82 + rand(seed + 13) * .58),\n      alpha: .32 * PHOTO_OPACITY / 100,\n      red: c.red, green: c.green, blue: c.blue,\n      soft: 1\n    });\n  }\n  return marks;\n}\n\nfunction move(mark, t) {\n  const speed = .08 + mark.seed * .044;\n  const cycle = (t * speed + mark.seed) % 1;\n  const growth = ease(.005, .8, cycle);\n  const appear = ease(.015, .34, cycle);\n  const disappear = 1 - ease(.64, .985, cycle);\n  const phase = cycle * TAU;\n  return {\n    dx: Math.sin(phase * .37) * 2.2,\n    dy: Math.cos(phase * .29) * 1.6,\n    size: .28 + growth * 1.34,\n    angle: Math.sin(phase * .24) * 2.9,\n    alpha: appear * disappear * .92\n  };\n}\n",
+  "capabilities": [
+    "brush",
+    "move"
+  ],
+  "settings": {
+    "FLOW": 2,
+    "SIZE": 30,
+    "FADE": 0,
+    "SPEED": 50,
+    "LINKS": 0,
+    "TERRITORY": 0,
+    "REBUILD_PHOTO": 1,
+    "PHOTO_OPACITY": 100,
+    "PHOTO_BLUR": 0
+  }
+}

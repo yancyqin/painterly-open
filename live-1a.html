@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#080b16">
+    <meta name="description" content="A one-canvas playback of the complete 1A Sunflower Parlor live-painting project.">
+    <title>1A Additive Single Canvas · Painterly Chameleon</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/src/live1a.css">
+    <script type="module" src="/src/live1a.ts"></script>
+  </head>
+  <body>
+    <main class="live-1a-stage" aria-label="1A Sunflower Parlor single-canvas live painting study">
+      <canvas id="live-1a-canvas" width="960" height="640" aria-label="Complete 1A living sunflower room rendered on one canvas"></canvas>
+      <nav class="live-1a-controls" aria-label="Additive render test">
+        <div class="live-1a-test-tabs" role="tablist" aria-label="Diagnostic phase">
+          <button type="button" role="tab" data-diagnostic-tab="baseline" aria-selected="true">BASELINE</button>
+          <button type="button" role="tab" data-diagnostic-tab="cadence" aria-selected="false">CADENCE</button>
+          <button type="button" role="tab" data-diagnostic-tab="marks" aria-selected="false">MARKS</button>
+          <button type="button" role="tab" data-diagnostic-tab="final" aria-selected="false">FINAL</button>
+          <button id="live-1a-stats" type="button">STATS</button>
+        </div>
+        <div class="live-1a-mode-panels">
+          <div class="live-1a-mode-buttons" data-diagnostic-panel="baseline">
+            <button type="button" data-additive-mode="live" aria-pressed="true">LIVE ONLY</button>
+            <button type="button" data-additive-mode="furniture" aria-pressed="false">+ FURNITURE</button>
+            <button type="button" data-additive-mode="chameleon" aria-pressed="false">+ CHAMELEON</button>
+            <button type="button" data-additive-mode="production" aria-pressed="false">PRODUCTION RENDERER + ALL</button>
+          </div>
+          <div class="live-1a-mode-buttons" data-diagnostic-panel="cadence" hidden>
+            <button type="button" data-additive-mode="game-frozen" aria-pressed="false">GAME MOVE · ROOM FROZEN</button>
+            <button type="button" data-additive-mode="game-15" aria-pressed="false">GAME MOVE · ROOM 15HZ</button>
+            <button type="button" data-additive-mode="game-base-30" aria-pressed="false">GAME 30HZ · BASE ONLY</button>
+          </div>
+          <div class="live-1a-mode-buttons" data-diagnostic-panel="marks" hidden>
+            <button type="button" data-additive-mode="game-rings-30" aria-pressed="false">8 RINGS</button>
+            <button type="button" data-additive-mode="game-flat-dots-30" aria-pressed="false">618 FLAT DOTS</button>
+            <button type="button" data-additive-mode="game-soft-75-30" aria-pressed="false">75 SOFT GLOW</button>
+            <button type="button" data-additive-mode="game-soft-204-30" aria-pressed="false">204 SOFT GLOW</button>
+            <button type="button" data-additive-mode="game-soft-618-30" aria-pressed="false">618 SOFT GLOW</button>
+            <button type="button" data-additive-mode="game-atlas-618-30" aria-pressed="false">618 GLOW · 1 ATLAS</button>
+            <button type="button" data-additive-mode="game-marks-30" aria-pressed="false">ALL 626</button>
+          </div>
+          <div class="live-1a-mode-buttons" data-diagnostic-panel="final" hidden>
+            <button type="button" data-additive-mode="game-coarse-warps-30" aria-pressed="false">+ WARPS 1–4</button>
+            <button type="button" data-additive-mode="game-30" aria-pressed="false">ORIGINAL FULL</button>
+            <button type="button" data-additive-mode="game-atlas-full-30" aria-pressed="false">FULL + 1 ATLAS</button>
+          </div>
+        </div>
+        <small>Compare the original FULL mode against FULL + 1 ATLAS. Production curated rooms now use the same one-atlas glow path by default.</small>
+      </nav>
+      <div id="live-1a-loading" class="live-1a-loading" aria-live="polite">painting…</div>
+    </main>
+  </body>
+</html>

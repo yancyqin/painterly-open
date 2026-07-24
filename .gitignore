@@ -1,0 +1,16 @@
+.DS_Store
+.env
+.env.*
+!.env.example
+.dev.vars
+node_modules/
+dist/
+.wrangler/
+coverage/
+*.log
+painterly-chameleon-itch.zip
+painterly-chameleon-itch.zip
+node_modules/
+dist/
+.wrangler/
+.vite/

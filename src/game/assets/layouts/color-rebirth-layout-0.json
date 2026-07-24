@@ -1,0 +1,559 @@
+{
+  "format": "chameleon-room-layout@1",
+  "roomId": "world-remembers-color",
+  "layoutVariant": 0,
+  "props": [
+    {
+      "id": "world-ink-brush-jar",
+      "modelId": "tall-brush-jar",
+      "x": 367.4,
+      "y": 414.6,
+      "rotation": 0,
+      "accent": 0,
+      "artId": "world-ink-brush-jar-v1"
+    },
+    {
+      "id": "world-ink-easel",
+      "modelId": "tripod-easel",
+      "x": 321.5,
+      "y": 363.7,
+      "rotation": 0,
+      "accent": 0,
+      "artId": "world-ink-easel-v1"
+    },
+    {
+      "id": "world-ink-sketches-added",
+      "modelId": "crumpled-sketches",
+      "x": 344,
+      "y": 448,
+      "rotation": 0,
+      "accent": 0,
+      "artId": "world-ink-sketches-v1"
+    },
+    {
+      "id": "world-ink-stool",
+      "modelId": "round-stool",
+      "x": 299.1,
+      "y": 431.3,
+      "rotation": 0,
+      "accent": 0,
+      "artId": "world-ink-stool-v1"
+    },
+    {
+      "id": "world-ink-trolley",
+      "modelId": "garden-trolley",
+      "x": 710,
+      "y": 438,
+      "rotation": 0,
+      "accent": 0,
+      "artId": "world-ink-trolley-v1"
+    },
+    {
+      "id": "world-islands-antigravity-papers",
+      "modelId": "world-antigravity-papers",
+      "x": 2408,
+      "y": 328,
+      "rotation": 0,
+      "accent": 2,
+      "artId": "world-islands-antigravity-papers-v1"
+    },
+    {
+      "id": "world-islands-brush-jar",
+      "modelId": "tall-brush-jar",
+      "x": 2154.4,
+      "y": 443.7,
+      "rotation": 0,
+      "accent": 2,
+      "artId": "world-islands-brush-jar-v1"
+    },
+    {
+      "id": "world-islands-easel",
+      "modelId": "tripod-easel",
+      "x": 2190,
+      "y": 370,
+      "rotation": 180,
+      "accent": 2,
+      "artId": "world-islands-easel-v1"
+    },
+    {
+      "id": "world-islands-sketches",
+      "modelId": "crumpled-sketches",
+      "x": 2344,
+      "y": 512,
+      "rotation": 0,
+      "accent": 2,
+      "artId": "world-islands-sketches-v1"
+    },
+    {
+      "id": "world-islands-stool",
+      "modelId": "round-stool",
+      "x": 2236.3,
+      "y": 443.9,
+      "rotation": 0,
+      "accent": 2,
+      "artId": "world-islands-stool-v1"
+    },
+    {
+      "id": "world-islands-trolley",
+      "modelId": "garden-trolley",
+      "x": 2634.7,
+      "y": 468.2,
+      "rotation": 0,
+      "accent": 2,
+      "artId": "world-islands-trolley-v1"
+    },
+    {
+      "id": "world-seasons-anchor-tree",
+      "modelId": "world-pink-green-tree",
+      "x": 1450.6,
+      "y": 334.2,
+      "rotation": 0,
+      "accent": 1,
+      "artId": "world-seasons-pink-green-tree-v1"
+    },
+    {
+      "id": "world-seasons-brush-jar",
+      "modelId": "tall-brush-jar",
+      "x": 1296,
+      "y": 384,
+      "rotation": 0,
+      "accent": 1,
+      "artId": "world-seasons-brush-jar-v1"
+    },
+    {
+      "id": "world-seasons-easel",
+      "modelId": "tripod-easel",
+      "x": 1230,
+      "y": 370,
+      "rotation": 0,
+      "accent": 1,
+      "artId": "world-seasons-easel-v1"
+    },
+    {
+      "id": "world-seasons-stool",
+      "modelId": "round-stool",
+      "x": 1232,
+      "y": 440,
+      "rotation": 0,
+      "accent": 1,
+      "artId": "world-seasons-stool-v1"
+    },
+    {
+      "id": "world-seasons-trolley",
+      "modelId": "garden-trolley",
+      "x": 1648,
+      "y": 448,
+      "rotation": 0,
+      "accent": 1,
+      "artId": "world-seasons-trolley-v1"
+    }
+  ],
+  "portals": [
+    {
+      "id": "color-ebb-seasons",
+      "leftEntry": {
+        "x": 848,
+        "y": 248,
+        "w": 115,
+        "h": 190
+      },
+      "rightEntry": {
+        "x": 968,
+        "y": 232,
+        "w": 115,
+        "h": 190
+      },
+      "leftExit": {
+        "x": 816,
+        "y": 336
+      },
+      "rightExit": {
+        "x": 1112,
+        "y": 336
+      },
+      "leftOpening": [
+        {
+          "x": 890,
+          "y": 246
+        },
+        {
+          "x": 954,
+          "y": 264
+        },
+        {
+          "x": 954,
+          "y": 512
+        },
+        {
+          "x": 854,
+          "y": 468
+        }
+      ],
+      "rightOpening": [
+        {
+          "x": 966,
+          "y": 264
+        },
+        {
+          "x": 1030,
+          "y": 246
+        },
+        {
+          "x": 1066,
+          "y": 468
+        },
+        {
+          "x": 966,
+          "y": 512
+        }
+      ],
+      "leftThreshold": [
+        {
+          "x": 854,
+          "y": 468
+        },
+        {
+          "x": 954,
+          "y": 512
+        },
+        {
+          "x": 954,
+          "y": 530
+        },
+        {
+          "x": 864,
+          "y": 484
+        }
+      ],
+      "rightThreshold": [
+        {
+          "x": 966,
+          "y": 512
+        },
+        {
+          "x": 1066,
+          "y": 468
+        },
+        {
+          "x": 1056,
+          "y": 484
+        },
+        {
+          "x": 966,
+          "y": 530
+        }
+      ]
+    },
+    {
+      "id": "seasons-islands",
+      "leftEntry": {
+        "x": 1800,
+        "y": 240,
+        "w": 115,
+        "h": 190
+      },
+      "rightEntry": {
+        "x": 1920,
+        "y": 248,
+        "w": 115,
+        "h": 190
+      },
+      "leftExit": {
+        "x": 1760,
+        "y": 336
+      },
+      "rightExit": {
+        "x": 2064,
+        "y": 352
+      },
+      "leftOpening": [
+        {
+          "x": 1850,
+          "y": 246
+        },
+        {
+          "x": 1914,
+          "y": 264
+        },
+        {
+          "x": 1914,
+          "y": 512
+        },
+        {
+          "x": 1814,
+          "y": 468
+        }
+      ],
+      "rightOpening": [
+        {
+          "x": 1926,
+          "y": 264
+        },
+        {
+          "x": 1990,
+          "y": 246
+        },
+        {
+          "x": 2026,
+          "y": 468
+        },
+        {
+          "x": 1926,
+          "y": 512
+        }
+      ],
+      "leftThreshold": [
+        {
+          "x": 1814,
+          "y": 468
+        },
+        {
+          "x": 1914,
+          "y": 512
+        },
+        {
+          "x": 1914,
+          "y": 530
+        },
+        {
+          "x": 1824,
+          "y": 484
+        }
+      ],
+      "rightThreshold": [
+        {
+          "x": 1926,
+          "y": 512
+        },
+        {
+          "x": 2026,
+          "y": 468
+        },
+        {
+          "x": 2016,
+          "y": 484
+        },
+        {
+          "x": 1926,
+          "y": 530
+        }
+      ]
+    }
+  ],
+  "floor": [
+    [
+      {
+        "x": 0,
+        "y": 264
+      },
+      {
+        "x": 104,
+        "y": 304
+      },
+      {
+        "x": 200,
+        "y": 216
+      },
+      {
+        "x": 416,
+        "y": 152
+      },
+      {
+        "x": 616,
+        "y": 168
+      },
+      {
+        "x": 840,
+        "y": 296
+      },
+      {
+        "x": 952,
+        "y": 312
+      },
+      {
+        "x": 952,
+        "y": 384
+      },
+      {
+        "x": 856,
+        "y": 376
+      },
+      {
+        "x": 800,
+        "y": 472
+      },
+      {
+        "x": 688,
+        "y": 592
+      },
+      {
+        "x": 288,
+        "y": 592
+      },
+      {
+        "x": 104,
+        "y": 384
+      },
+      {
+        "x": 0,
+        "y": 384
+      }
+    ],
+    [
+      {
+        "x": 968,
+        "y": 312
+      },
+      {
+        "x": 1088,
+        "y": 288
+      },
+      {
+        "x": 1144,
+        "y": 224
+      },
+      {
+        "x": 1232,
+        "y": 184
+      },
+      {
+        "x": 1384,
+        "y": 144
+      },
+      {
+        "x": 1560,
+        "y": 152
+      },
+      {
+        "x": 1664,
+        "y": 200
+      },
+      {
+        "x": 1744,
+        "y": 248
+      },
+      {
+        "x": 1800,
+        "y": 288
+      },
+      {
+        "x": 1912,
+        "y": 320
+      },
+      {
+        "x": 1904,
+        "y": 408
+      },
+      {
+        "x": 1808,
+        "y": 416
+      },
+      {
+        "x": 1768,
+        "y": 464
+      },
+      {
+        "x": 1648,
+        "y": 576
+      },
+      {
+        "x": 1176,
+        "y": 560
+      },
+      {
+        "x": 1072,
+        "y": 384
+      },
+      {
+        "x": 968,
+        "y": 384
+      }
+    ],
+    [
+      {
+        "x": 1920,
+        "y": 336
+      },
+      {
+        "x": 2048,
+        "y": 312
+      },
+      {
+        "x": 2144,
+        "y": 232
+      },
+      {
+        "x": 2312,
+        "y": 192
+      },
+      {
+        "x": 2544,
+        "y": 200
+      },
+      {
+        "x": 2760,
+        "y": 320
+      },
+      {
+        "x": 2872,
+        "y": 344
+      },
+      {
+        "x": 2880,
+        "y": 392
+      },
+      {
+        "x": 2776,
+        "y": 384
+      },
+      {
+        "x": 2720,
+        "y": 472
+      },
+      {
+        "x": 2608,
+        "y": 592
+      },
+      {
+        "x": 2200,
+        "y": 592
+      },
+      {
+        "x": 2032,
+        "y": 400
+      },
+      {
+        "x": 1920,
+        "y": 408
+      }
+    ]
+  ],
+  "collisionRects": [
+    {
+      "x": 1416.1,
+      "y": 268.1,
+      "w": 45.6,
+      "h": 64.4
+    },
+    {
+      "x": 1395.3,
+      "y": 316,
+      "w": 91,
+      "h": 43.2
+    }
+  ],
+  "spawns": {
+    "hiderSpawn": {
+      "x": 208,
+      "y": 344
+    },
+    "seekerSpawn": {
+      "x": 2560,
+      "y": 496
+    },
+    "spectatorSpawn": {
+      "x": 208,
+      "y": 392
+    }
+  }
+}

@@ -63,16 +63,16 @@ test("1C curated Live Painting asset stays bounded and source-free", () => {
   }
 });
 
-test("1B correction curated Live Painting asset stays bounded and source-free", () => {
+test("1B owner-approved Curve Current stays explicitly bounded and source-free", () => {
   assert.equal(starryProject.format, "painterly-curated-live-project");
   assert.equal(starryProject.version, 1);
   assert.equal(starryProject.artHouse, "van-gogh-house");
   assert.equal(starryProject.roomIndex, 1);
   assert.equal(starryProject.baseSurface, 0);
-  assert.deepEqual(starryProject.stats, { marks: 1233, strokes: 88, warpFields: 0 });
+  assert.deepEqual(starryProject.stats, { marks: 4910, strokes: 227, warpFields: 0 });
   assert.equal(
     starryProject.source.lppSha256,
-    "sha256:d567a1b07cc75e7e0ff925a592fa39c933730aae514f323f5a85aa9e0464ae15",
+    "sha256:1b26be2478043bb57b0abd1cc0130ae2c70061061d5e3b29eb727cca9d734cd9",
   );
   assert.equal(
     starryProject.source.sha256,
@@ -83,11 +83,29 @@ test("1B correction curated Live Painting asset stays bounded and source-free", 
   assert.equal(kinds.filter(kind => kind === "twinkle").length, 4);
   assert.equal(kinds.filter(kind => kind === "color-liquify-splash").length, 14);
   assert.equal(kinds.filter(kind => kind === "color-liquify-breakout").length, 2);
+  assert.equal(kinds.filter(kind => kind === "curve-current").length, 3);
   assert.equal(kinds.filter(kind => kind === "galaxy").length, 0);
   assert.deepEqual(
     starryProject.adapters["sha256:36cb21d7a2dca0befd24c387d7930991daefa7dc71a72f9bf59841ceaec17d7a"],
     { kind: "color-liquify-breakout", speed: 10, size: 11, travel: 10, lives: 2.8 },
   );
+  for (const revision of [
+    "sha256:a8702e96aacda345e971d203b34c689d0bb404960425eb6d1abc4f23b413230d",
+    "sha256:6de17a7cd51904f7056d233d0d65232b176212bdf68efe9a1f1434f8333553c7",
+    "sha256:2c730ba29858619f259549bc01c79540ed515ff7b9004c8ba3339daaaaa111cd",
+  ]) {
+    assert.deepEqual(starryProject.adapters[revision], {
+      kind: "curve-current",
+      speed: 17,
+      flow: 3,
+      startStagger: .38,
+      activeWindow: .55,
+      arriveAt: .78,
+      wobble: 4,
+      photoOpacity: 78,
+      photoBlur: 7,
+    });
+  }
   assert.deepEqual(
     starryProject.adapters["sha256:d1e72b3f6e17396bb4d6f0eedd4a119e688677e289f09ba7683f565c30a79e88"],
     { kind: "color-liquify-breakout", speed: 10, size: 7, travel: 10, lives: 2.8 },

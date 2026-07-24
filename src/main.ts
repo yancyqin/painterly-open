@@ -329,6 +329,7 @@ interface CanvasLoaderState {
   loader: HTMLElement;
   viewport: HTMLElement;
   roomLoading: boolean;
+  roomLoadingImmediate: boolean;
   taskCount: number;
   showTimer: number;
 }
@@ -338,7 +339,7 @@ const canvasLoaderStates = new Map<string, CanvasLoaderState>();
 function syncCanvasLoader(state: CanvasLoaderState): void {
   window.clearTimeout(state.showTimer);
   state.showTimer = 0;
-  if (state.taskCount > 0) {
+  if (state.taskCount > 0 || (state.roomLoading && state.roomLoadingImmediate)) {
     state.loader.hidden = false;
     state.viewport.setAttribute("aria-busy", "true");
     return;
@@ -381,10 +382,18 @@ function wireCanvasLoaders(): void {
     const viewport = document.getElementById(canvasId)?.closest<HTMLElement>(".play-viewport");
     const loader = viewport?.querySelector<HTMLElement>("[data-canvas-loader]");
     if (!viewport || !loader) return;
-    const state: CanvasLoaderState = { loader, viewport, roomLoading: false, taskCount: 0, showTimer: 0 };
+    const state: CanvasLoaderState = {
+      loader,
+      viewport,
+      roomLoading: false,
+      roomLoadingImmediate: false,
+      taskCount: 0,
+      showTimer: 0,
+    };
     canvasLoaderStates.set(canvasId, state);
-    scene.onLoadingChange(loading => {
+    scene.onLoadingChange((loading, immediate) => {
       state.roomLoading = loading;
+      state.roomLoadingImmediate = immediate;
       syncCanvasLoader(state);
     });
   };

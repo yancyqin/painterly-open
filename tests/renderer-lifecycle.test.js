@@ -96,11 +96,14 @@ test("Hider palette and done-hiding control share one joystick-sized footprint",
   assert.match(main, /paint: openPaintStudio,[\s\S]*?hide: \(\) => void publishChallenge\(\)/);
 });
 
-test("portrait Hider matches the joystick-sized palette at right and reveals Done in the middle", () => {
+test("portrait Hider keeps the paint board at right and puts Done below the room art", () => {
   assert.match(gameCanvas, /private portraitPaintButtonRect/);
   assert.match(gameCanvas, /private portraitPaintButtonRect[\s\S]*?this\.ui\.joyBase \* 2/);
   assert.match(gameCanvas, /x: this\.cam\.w - 18 - size/);
-  assert.match(gameCanvas, /if \(this\.hud\.paintVisited\)[\s\S]*?Math\.round\(\(this\.cam\.w - doneW\) \/ 2\)/);
+  assert.match(gameCanvas, /private portraitDoneButtonRect/);
+  assert.match(gameCanvas, /const roomBottom = this\.cam\.oy \+ VIEW_HEIGHT \* this\.cam\.scale/);
+  assert.match(gameCanvas, /y: Math\.min\(this\.cam\.h - 20 - h, Math\.round\(roomBottom \+ 14\)\)/);
+  assert.match(gameCanvas, /if \(this\.hud\.paintVisited\)[\s\S]*?const done = this\.portraitDoneButtonRect\(\)/);
 });
 
 test("portrait phones separate Live and Lobby from the room art", () => {
@@ -117,7 +120,7 @@ test("share modal uses a clear local room crop without the old blur-doodle encod
 test("Hider paint guidance starts after the room is visible on mobile", () => {
   const setActive = gameCanvas.match(/setActive\(active: boolean\): void \{([\s\S]*?)\n  \}/)?.[1] ?? "";
   assert.doesNotMatch(setActive, /hiderOnboardingStartedAt = performance\.now/);
-  assert.match(gameCanvas, /this\.setRoomLoading\(!\(this\.backgroundReady && this\.foregroundReady\)\);\s+context\.restore\(\);[\s\S]*?this\.startHiderOnboardingIfReady\(\)/);
+  assert.match(gameCanvas, /this\.setRoomLoading\(this\.roomTransitionPending \|\| !\(this\.backgroundReady && this\.foregroundReady\)\);\s+context\.restore\(\);[\s\S]*?this\.startHiderOnboardingIfReady\(\)/);
   assert.match(gameCanvas, /private startHiderOnboardingIfReady[\s\S]*?!this\.roomLoading[\s\S]*?this\.hiderOnboardingStartedAt = time/);
 });
 
@@ -144,6 +147,14 @@ test("curated room renderer has no per-mark, FX, layer or glow canvas", () => {
   assert.match(curatedRenderer, /this\.sourceCanvas\.width = 0;\s+this\.sourceCanvas\.height = 0/);
   assert.match(curatedRenderer, /for \(const slice of field\.slices\)/);
   assert.match(curatedRenderer, /this\.releaseWarpBlur\(\)/);
+});
+
+test("curated mark atlas stays within a mobile-safe texture edge", () => {
+  assert.match(curatedRenderer, /const MAX_MARK_ATLAS_EDGE = 4_096/);
+  assert.match(curatedRenderer, /Math\.ceil\(Math\.sqrt\(cellCount\)\)/);
+  assert.match(curatedRenderer, /Curated mark atlas exceeds the mobile texture bound/);
+  assert.match(curatedRenderer, /private readonly resolvedMark: ResolvedMark/);
+  assert.match(curatedRenderer, /const resolved = this\.resolvedMark/);
 });
 
 test("Unfinished Morning does not create a canvas per sampled color", () => {
@@ -203,6 +214,19 @@ test("movement keeps the animated room and actor in the same render pass", () =>
   assert.match(gameCanvas, /moveActor\(dx: number, dy: number, deltaMs: number\): void[\s\S]*?this\.render\(\)/);
   assert.match(gameCanvas, /context\.drawImage\(this\.refreshRoomFrame\(\)[\s\S]*?this\.drawWorldForeground\(\)/);
   assert.doesNotMatch(gameCanvas, /renderMovementForeground|actorMovementRect|joystickMovementRect/);
+});
+
+test("portal transitions paint the destination loader before cold Live preparation", () => {
+  assert.match(gameCanvas, /type LoadingChangeHandler = \(loading: boolean, immediate: boolean\) => void/);
+  assert.match(gameCanvas, /if \(this\.livePainting && supportsCuratedLiveProject\(this\.artHouse, roomIndex\)\) \{[\s\S]*?this\.setRoomLoading\(true, true\);\s+this\.roomTransitionPending = true/);
+  assert.match(gameCanvas, /if \(this\.roomTransitionPending\) return frame/);
+  assert.match(gameCanvas, /requestAnimationFrame\(\(\) => \{[\s\S]*?this\.roomTransitionPending = false;[\s\S]*?this\.render\(\)/);
+  assert.equal(
+    (gameCanvas.match(/this\.setRoomLoading\(this\.roomTransitionPending \|\| !\(this\.backgroundReady && this\.foregroundReady\)\)/g) ?? []).length,
+    2,
+  );
+  assert.match(main, /state\.taskCount > 0 \|\| \(state\.roomLoading && state\.roomLoadingImmediate\)/);
+  assert.match(main, /scene\.onLoadingChange\(\(loading, immediate\) =>/);
 });
 
 test("1B Live omits only the duplicate paint-splashed rug", () => {

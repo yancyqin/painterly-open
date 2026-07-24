@@ -140,9 +140,9 @@ recorded in `content/live-projects/FINAL-FIXTURES.md`.
 
 - Final 1A is now the editable source and generated runtime used by the Phase 1
   single-Canvas control page.
-- The corrected 1B supplied on 2026-07-23 is the editable source at
+- The Curve Current 1B supplied on 2026-07-24 is the editable source at
   `content/live-projects/van-gogh-starry-studio-1b.lpp`; its generated runtime
-  is ready for owner visual/mobile QA.
+  passed owner visual/mobile movement QA on 2026-07-24.
 - Final 1C replaced the earlier runtime source at
   `content/live-projects/van-gogh-cypress-bedroom-1c.lpp`; its generated
   runtime is ready for owner visual/mobile QA.
@@ -161,11 +161,12 @@ runtime JSON or executed by Painterly Chameleon.
   `rooms/van-gogh-starry-studio-shell-v6a.jpg` (SHA-256
   `34684e067ca29b9219b00e6949463d70e5b6f7bbeab106f7f14063c708a2cbab`).
 - The imported `.lpp` SHA-256 is
-  `d567a1b07cc75e7e0ff925a592fa39c933730aae514f323f5a85aa9e0464ae15`.
-- The browser receives 1,233 declarative marks and reviewed static Color
-  Liquify Splash, directional Color Liquify Breakout and Stars/Twinkle
-  adapters. Their source-derived pigments are prepared once and packed into
-  one shared atlas.
+  `1b26be2478043bb57b0abd1cc0130ae2c70061061d5e3b29eb727cca9d734cd9`.
+- The browser receives 4,910 declarative marks and reviewed static Color
+  Liquify Splash, directional Color Liquify Breakout, Stars/Twinkle and Curve
+  Current adapters. Their source-derived pigments are packed into one shared
+  atlas; Curve Current path starts and structure are prepared once. The archive
+  retains Function Brush source, but generated runtime data does not.
 
 ## Curated Live Painting project: Van Gogh 1C
 

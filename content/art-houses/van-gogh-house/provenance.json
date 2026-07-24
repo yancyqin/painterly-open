@@ -52,10 +52,10 @@
         {
           "room": "1B Starry Studio",
           "path": "content/live-projects/van-gogh-starry-studio-1b.lpp",
-          "sha256": "d567a1b07cc75e7e0ff925a592fa39c933730aae514f323f5a85aa9e0464ae15",
+          "sha256": "1b26be2478043bb57b0abd1cc0130ae2c70061061d5e3b29eb727cca9d734cd9",
           "shell_sha256": "34684e067ca29b9219b00e6949463d70e5b6f7bbeab106f7f14063c708a2cbab",
-          "stats": { "marks": 1233, "strokes": 88, "warp_fields": 0 },
-          "runtime_status": "correction-imported-owner-qa-pending"
+          "stats": { "marks": 4910, "strokes": 227, "warp_fields": 0 },
+          "runtime_status": "imported-owner-approved"
         },
         {
           "room": "1C Cypress Bedroom",

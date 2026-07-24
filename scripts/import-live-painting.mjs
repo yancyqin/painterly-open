@@ -30,6 +30,11 @@ const TARGETS = Object.freeze({
     sceneId: "starry-studio",
     shell: "src/game/assets/rooms/van-gogh-starry-studio-shell-v6a.jpg",
     output: "src/game/assets/live-projects/van-gogh-starry-studio-1b.json",
+    // This owner-authored project deliberately exceeds the global 2,000-mark
+    // contract. The exact room-scoped exception passed owner visual/movement
+    // QA on a real phone on 2026-07-24; do not turn it into a global limit.
+    maxMarks: 4_910,
+    maxRuntimeBytes: 3 * 1024 * 1024,
   },
   "van-gogh-cypress-bedroom-1c": {
     artHouse: "van-gogh-house",
@@ -189,6 +194,39 @@ const APPROVED_ADAPTERS = Object.freeze({
     edgeBlur: 7,
     edgeOpacity: 72,
   },
+  "sha256:a8702e96aacda345e971d203b34c689d0bb404960425eb6d1abc4f23b413230d": {
+    kind: "curve-current",
+    speed: 17,
+    flow: 3,
+    startStagger: .38,
+    activeWindow: .55,
+    arriveAt: .78,
+    wobble: 4,
+    photoOpacity: 78,
+    photoBlur: 7,
+  },
+  "sha256:6de17a7cd51904f7056d233d0d65232b176212bdf68efe9a1f1434f8333553c7": {
+    kind: "curve-current",
+    speed: 17,
+    flow: 3,
+    startStagger: .38,
+    activeWindow: .55,
+    arriveAt: .78,
+    wobble: 4,
+    photoOpacity: 78,
+    photoBlur: 7,
+  },
+  "sha256:2c730ba29858619f259549bc01c79540ed515ff7b9004c8ba3339daaaaa111cd": {
+    kind: "curve-current",
+    speed: 17,
+    flow: 3,
+    startStagger: .38,
+    activeWindow: .55,
+    arriveAt: .78,
+    wobble: 4,
+    photoOpacity: 78,
+    photoBlur: 7,
+  },
 });
 
 function fail(message) {
@@ -304,7 +342,9 @@ function buildProject(lppPath, targetKey) {
         return stripped;
       });
       markCount += marks.length;
-      if (markCount > 2_000) fail("project has more than 2,000 marks");
+      if (markCount > (target.maxMarks ?? 2_000)) {
+        fail(`project has more than ${target.maxMarks ?? 2_000} marks`);
+      }
       strokes.push({ brushRevision: stroke.brushRevision, marks });
     }
     layers.push({
@@ -358,7 +398,10 @@ function buildProject(lppPath, targetKey) {
     stats: { marks: markCount, strokes: layers.reduce((sum, layer) => sum + layer.strokes.length, 0), warpFields: warps.length },
   };
   const json = `${JSON.stringify(project, null, 2)}\n`;
-  if (Buffer.byteLength(json) > 2 * 1024 * 1024) fail("runtime JSON exceeds 2 MB");
+  const maxRuntimeBytes = target.maxRuntimeBytes ?? 2 * 1024 * 1024;
+  if (Buffer.byteLength(json) > maxRuntimeBytes) {
+    fail(`runtime JSON exceeds ${Math.round(maxRuntimeBytes / 1024 / 1024)} MB`);
+  }
   return { json, target };
 }
 

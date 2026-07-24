@@ -39,6 +39,7 @@ const HIDER_INSPECTION_WIDTH = 208;
 const HIDER_INSPECTION_HEIGHT = 117;
 type RoomIndex = 0 | 1 | 2;
 type RoomChangeHandler = (roomIndex: RoomIndex) => void;
+type LoadingChangeHandler = (loading: boolean, immediate: boolean) => void;
 
 // --- On-canvas play UI ("everything on canvas") ---------------------------
 // All HUD/controls are drawn in the same 960×640 design space as the room, so
@@ -152,8 +153,13 @@ export class GameCanvas {
   private movementHandler: ((moving: boolean) => void) | null = null;
   // Fired when the current room's background flips loading↔ready, so a loader
   // overlay can show while a room's art streams in (cold cache / slow mobile).
-  private loadingHandler: ((loading: boolean) => void) | null = null;
+  private loadingHandler: LoadingChangeHandler | null = null;
   private roomLoading = false;
+  private roomLoadingImmediate = false;
+  // A portal transition must paint the existing DOM loader before a cold
+  // room parses its project and prepares a large atlas. Until the next rAF,
+  // keep showing the previous cached room frame underneath that opaque cover.
+  private roomTransitionPending = false;
   private inspectionCanvas: HTMLCanvasElement | null = null;
   private targetFacing: -1 | 1 = -1;
   private explorerFacing: -1 | 1 = 1;
@@ -284,6 +290,7 @@ export class GameCanvas {
 
   private refreshRoomFrame(time = performance.now()): HTMLCanvasElement {
     const frame = this.ensureRoomFrame();
+    if (this.roomTransitionPending) return frame;
     if (!this.roomFrameDirty) return frame;
     const context = frame.getContext("2d", { alpha: false })!;
     context.setTransform(1, 0, 0, 1, 0, 0);
@@ -741,15 +748,17 @@ export class GameCanvas {
 
   /** Notified when the current room's background flips loading↔ready. Fires
    *  immediately with the current state so the overlay starts in sync. */
-  onLoadingChange(handler: (loading: boolean) => void): void {
+  onLoadingChange(handler: LoadingChangeHandler): void {
     this.loadingHandler = handler;
-    handler(this.roomLoading);
+    handler(this.roomLoading, this.roomLoadingImmediate);
   }
 
-  private setRoomLoading(loading: boolean): void {
-    if (loading === this.roomLoading) return;
+  private setRoomLoading(loading: boolean, immediate = false): void {
+    const nextImmediate = loading && immediate;
+    if (loading === this.roomLoading && (!nextImmediate || this.roomLoadingImmediate)) return;
     this.roomLoading = loading;
-    this.loadingHandler?.(loading);
+    this.roomLoadingImmediate = nextImmediate;
+    this.loadingHandler?.(loading, nextImmediate);
   }
 
   attachInspection(canvas: HTMLCanvasElement): void {
@@ -1040,7 +1049,7 @@ export class GameCanvas {
       // then draw depth-sorted furniture, actors and the HUD above it.
       context.drawImage(this.refreshRoomFrame(), 0, 0, VIEW_WIDTH, VIEW_HEIGHT);
       this.foregroundReady = this.drawWorldForeground();
-      this.setRoomLoading(!(this.backgroundReady && this.foregroundReady));
+      this.setRoomLoading(this.roomTransitionPending || !(this.backgroundReady && this.foregroundReady));
       context.restore();
       // On a phone the room can spend several seconds behind the loading
       // cover. Start the brief guide only once the player can actually see it,
@@ -1066,7 +1075,7 @@ export class GameCanvas {
       );
     }
     if (includeForeground) this.foregroundReady = this.drawWorldForeground();
-    this.setRoomLoading(!(this.backgroundReady && this.foregroundReady));
+    this.setRoomLoading(this.roomTransitionPending || !(this.backgroundReady && this.foregroundReady));
   }
 
   private drawWorldBackground(context: CanvasRenderingContext2D, sceneSeconds: number): boolean {
@@ -1468,6 +1477,20 @@ export class GameCanvas {
     };
   }
 
+  private portraitDoneButtonRect(): { x: number; y: number; w: number; h: number } {
+    const w = Math.round(Math.max(96, Math.min(124, this.cam.w * .28)));
+    const h = Math.round(Math.max(38, Math.min(46, this.ui.joyBase * .72)));
+    // Put Done directly below the 3:2 room artwork. The lower control row then
+    // belongs only to movement (left) and the paint board (right).
+    const roomBottom = this.cam.oy + VIEW_HEIGHT * this.cam.scale;
+    return {
+      x: Math.round((this.cam.w - w) / 2),
+      y: Math.min(this.cam.h - 20 - h, Math.round(roomBottom + 14)),
+      w,
+      h,
+    };
+  }
+
   private isPortraitPhone(): boolean {
     return this.cam.w < this.cam.h && this.cam.w <= 760;
   }
@@ -1562,20 +1585,18 @@ export class GameCanvas {
   private drawButtons(ctx: CanvasRenderingContext2D): void {
     if (this.mode === "hider") {
       if (this.isPortraitPhone()) {
-        // Mobile keeps the familiar palette fixed at bottom-right. Once Studio
-        // has been opened, the separate Done action occupies the open middle
-        // lane between the joystick and palette.
+        // Mobile keeps movement and painting as the two bottom controls. Once
+        // Studio has been opened, Done sits directly below the room artwork.
         const palette = this.portraitPaintButtonRect();
         this.drawPaintPaletteButton(ctx, palette.x, palette.y, palette.size);
         if (this.hud.paintVisited) {
-          const doneW = Math.round(Math.max(96, Math.min(124, this.cam.w * .28)));
-          const doneH = Math.round(Math.max(38, Math.min(46, this.ui.joyBase * .72)));
+          const done = this.portraitDoneButtonRect();
           this.drawButton(
             ctx,
-            Math.round((this.cam.w - doneW) / 2),
-            this.cam.h - 20 - doneH,
-            doneW,
-            doneH,
+            done.x,
+            done.y,
+            done.w,
+            done.h,
             this.labels.hide,
             "hide",
             true,
@@ -1941,6 +1962,20 @@ export class GameCanvas {
     if (changed) {
       this.roomFrameDirty = true;
       this.syncLiveRendererLifecycle();
+      // This notification belongs to the destination room. It bypasses the
+      // normal 150ms anti-flash delay, then defers destination rendering by
+      // one rAF so the existing painting-chameleon overlay reaches the screen
+      // before JSON parsing / source sampling / atlas construction begins.
+      if (this.livePainting && supportsCuratedLiveProject(this.artHouse, roomIndex)) {
+        this.setRoomLoading(true, true);
+        this.roomTransitionPending = true;
+        requestAnimationFrame(() => {
+          if (!this.roomTransitionPending) return;
+          this.roomTransitionPending = false;
+          this.roomFrameDirty = true;
+          this.render();
+        });
+      }
     }
     if (changed) this.roomChangeHandler?.(roomIndex);
   }

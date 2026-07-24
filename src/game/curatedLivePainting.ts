@@ -3,6 +3,7 @@ const ROOM_HEIGHT = 640;
 const WARP_GRID_WIDTH = 96;
 const WARP_GRID_HEIGHT = 64;
 const MAX_RENDERED_MARK_SIZE = 240;
+const MAX_MARK_ATLAS_EDGE = 4_096;
 
 type MarkShape = "dot" | "square" | "ring" | "star" | "streak";
 
@@ -108,6 +109,18 @@ interface ColorLiquifyBreakoutAdapter {
   lives: number;
 }
 
+interface CurveCurrentAdapter {
+  kind: "curve-current";
+  speed: number;
+  flow: number;
+  startStagger: number;
+  activeWindow: number;
+  arriveAt: number;
+  wobble: number;
+  photoOpacity: number;
+  photoBlur: number;
+}
+
 type CuratedMarkAdapter =
   | LissajousAdapter
   | RippleAdapter
@@ -116,7 +129,8 @@ type CuratedMarkAdapter =
   | TwinkleAdapter
   | GalaxyAdapter
   | ColorLiquifySplashAdapter
-  | ColorLiquifyBreakoutAdapter;
+  | ColorLiquifyBreakoutAdapter
+  | CurveCurrentAdapter;
 type CuratedAdapter = CuratedMarkAdapter | LiquidWarpAdapter;
 
 interface CuratedWarpField {
@@ -178,11 +192,29 @@ interface PreparedMark extends CuratedLiveMark {
   atlasGreen: number;
   atlasBlue: number;
   atlasSoftIdx: number;
+  curveStartDistance: number;
+  curveSideDistance: number;
+  curveOrder: number;
+}
+
+interface PreparedCurvePoint {
+  x: number;
+  y: number;
+  distance: number;
+}
+
+interface PreparedCurvePath {
+  points: PreparedCurvePoint[];
+  total: number;
+  endpointX: number;
+  endpointY: number;
+  endpointAngle: number;
 }
 
 interface PreparedStroke {
   adapter: CuratedMarkAdapter;
   marks: PreparedMark[];
+  curvePath: PreparedCurvePath | null;
 }
 
 interface PreparedLayer {
@@ -344,6 +376,79 @@ function speedScale(speed: number): number {
   return .15 + clamp(speed, 0, 100) / 100 * 1.85;
 }
 
+function prepareCurvePath(
+  marks: readonly CuratedLiveMark[],
+  adapter: CurveCurrentAdapter,
+): { path: PreparedCurvePath | null; starts: { distance: number; side: number; order: number }[] } {
+  const flow = Math.floor(adapter.flow);
+  if (flow < 1 || flow > 8) throw new Error("Curve Current flow is out of bounds");
+  const points: PreparedCurvePoint[] = [];
+  let total = 0;
+  for (let offset = 0; offset < marks.length; offset += flow) {
+    const end = Math.min(marks.length, offset + flow);
+    let x = 0;
+    let y = 0;
+    for (let index = offset; index < end; index += 1) {
+      x += marks[index]!.x;
+      y += marks[index]!.y;
+    }
+    x /= end - offset;
+    y /= end - offset;
+    const before = points.at(-1);
+    if (before) {
+      const step = Math.hypot(x - before.x, y - before.y);
+      if (step <= .25) continue;
+      total += step;
+    }
+    points.push({ x, y, distance: total });
+  }
+  if (points.length < 2 || total < 2) {
+    return {
+      path: null,
+      starts: marks.map(() => ({ distance: 0, side: 0, order: 0 })),
+    };
+  }
+
+  const endpoint = points.at(-1)!;
+  const beforeEndpoint = points.at(-2)!;
+  const endpointAngle = Math.atan2(endpoint.y - beforeEndpoint.y, endpoint.x - beforeEndpoint.x);
+  const path: PreparedCurvePath = {
+    points,
+    total,
+    endpointX: endpoint.x,
+    endpointY: endpoint.y,
+    endpointAngle,
+  };
+  const starts = marks.map(mark => {
+    let bestDistanceSquared = Number.POSITIVE_INFINITY;
+    let distance = 0;
+    let side = 0;
+    for (let index = 1; index < points.length; index += 1) {
+      const before = points[index - 1]!;
+      const after = points[index]!;
+      const segmentX = after.x - before.x;
+      const segmentY = after.y - before.y;
+      const segmentLengthSquared = segmentX * segmentX + segmentY * segmentY;
+      if (segmentLengthSquared <= .0001) continue;
+      const segmentLength = Math.sqrt(segmentLengthSquared);
+      const amount = clamp(
+        ((mark.x - before.x) * segmentX + (mark.y - before.y) * segmentY) / segmentLengthSquared,
+        0,
+        1,
+      );
+      const offsetX = mark.x - (before.x + segmentX * amount);
+      const offsetY = mark.y - (before.y + segmentY * amount);
+      const distanceSquared = offsetX * offsetX + offsetY * offsetY;
+      if (distanceSquared >= bestDistanceSquared) continue;
+      bestDistanceSquared = distanceSquared;
+      distance = before.distance + segmentLength * amount;
+      side = offsetX * (-segmentY / segmentLength) + offsetY * (segmentX / segmentLength);
+    }
+    return { distance, side, order: clamp(distance / total, 0, 1) };
+  });
+  return { path, starts };
+}
+
 function featherWarpMask(
   mask: Uint8Array,
   adapter: LiquidWarpAdapter,
@@ -409,6 +514,25 @@ function featherWarpMask(
  */
 export class CuratedLiveRoomRenderer {
   private readonly sourceCanvas = document.createElement("canvas");
+  // resolveMark writes into this one scratch record. drawOneMark consumes it
+  // synchronously before the next mark, avoiding thousands of short-lived
+  // result objects in high-cardinality rooms.
+  private readonly resolvedMark: ResolvedMark = {
+    x: 0,
+    y: 0,
+    size: 0,
+    alpha: 0,
+    red: 0,
+    green: 0,
+    blue: 0,
+    shape: "dot",
+    softIdx: 0,
+    angle: 0,
+    glow: false,
+    atlasIndex: -1,
+    atlasVariantCount: 0,
+    atlasBaseSize: 0,
+  };
   // Allocated only for the live-1a atlas A/B. One atlas packs every authored
   // color; it is never one canvas per mark, color, layer or animation state.
   private markAtlasCanvas: HTMLCanvasElement | null = null;
@@ -562,9 +686,13 @@ export class CuratedLiveRoomRenderer {
         if (!adapter || adapter.kind === "liquid-warp") {
           throw new Error(`Missing mark adapter ${stroke.brushRevision}`);
         }
+        const curve = adapter.kind === "curve-current"
+          ? prepareCurvePath(stroke.marks, adapter)
+          : null;
         return {
           adapter,
-          marks: stroke.marks.map(mark => {
+          curvePath: curve?.path ?? null,
+          marks: stroke.marks.map((mark, markIndex) => {
             const sampleX = adapter.kind === "ripple" ? mark.x + adapter.size / 2 : mark.x;
             const sampled = this.photo(sampleX, mark.y) ?? [mark.red, mark.green, mark.blue];
             const atlasEligible = (mark.shape === "dot" || mark.shape === "streak")
@@ -574,9 +702,11 @@ export class CuratedLiveRoomRenderer {
                 || adapter.kind === "twinkle"
                 || adapter.kind === "galaxy"
                 || adapter.kind === "color-liquify-splash"
-                || adapter.kind === "color-liquify-breakout");
+                || adapter.kind === "color-liquify-breakout"
+                || adapter.kind === "curve-current");
             const atlasUsesPhoto = adapter.kind === "growth";
-            const atlasSoftIdx = adapter.kind === "growth" && adapter.photoBlur > 0
+            const atlasSoftIdx = (adapter.kind === "growth" || adapter.kind === "curve-current")
+              && adapter.photoBlur > 0
               ? Math.max(mark.softIdx, Math.round(clamp(adapter.photoBlur / 40, 0, 1) * 3))
               : mark.softIdx;
             // Splash animates soft from .72→1.0. Bake its four discrete runtime
@@ -598,6 +728,9 @@ export class CuratedLiveRoomRenderer {
               atlasGreen: atlasUsesPhoto ? sampled[1] : mark.green,
               atlasBlue: atlasUsesPhoto ? sampled[2] : mark.blue,
               atlasSoftIdx,
+              curveStartDistance: curve?.starts[markIndex]?.distance ?? 0,
+              curveSideDistance: curve?.starts[markIndex]?.side ?? 0,
+              curveOrder: curve?.starts[markIndex]?.order ?? 0,
             };
           }),
         };
@@ -665,9 +798,21 @@ export class CuratedLiveRoomRenderer {
       }
     }
     const tileSize = Math.max(8, Math.ceil(maxOuterRadius * 2) + 4);
-    const columns = Math.max(1, Math.min(64, Math.floor(1024 / tileSize)));
     const cellCount = marks.reduce((sum, mark) => sum + mark.atlasVariantCount, 0);
+    // Keep the one shared texture close to square. The old 1024px-wide strip
+    // became 5456px tall for 1B Curve Current, beyond common mobile texture
+    // limits even though its total pixel count was bounded.
+    const columns = Math.max(
+      1,
+      Math.min(
+        Math.ceil(Math.sqrt(cellCount)),
+        Math.floor(MAX_MARK_ATLAS_EDGE / tileSize),
+      ),
+    );
     const rows = Math.ceil(cellCount / columns);
+    if (columns * tileSize > MAX_MARK_ATLAS_EDGE || rows * tileSize > MAX_MARK_ATLAS_EDGE) {
+      throw new Error("Curated mark atlas exceeds the mobile texture bound");
+    }
     const atlas = document.createElement("canvas");
     atlas.width = columns * tileSize;
     atlas.height = rows * tileSize;
@@ -802,7 +947,7 @@ export class CuratedLiveRoomRenderer {
       for (const mark of stroke.marks) {
         if (markBudget.remaining <= 0) return;
         markBudget.remaining -= 1;
-        const output = this.resolveMark(mark, adapter, brushTime, layerSeconds);
+        const output = this.resolveMark(mark, stroke, brushTime, layerSeconds);
         if (!output) continue;
         output.alpha *= layer.opacity;
         if (output.alpha > .01) {
@@ -820,10 +965,11 @@ export class CuratedLiveRoomRenderer {
 
   private resolveMark(
     mark: PreparedMark,
-    adapter: CuratedMarkAdapter,
+    stroke: PreparedStroke,
     brushTime: number,
     layerSeconds: number,
   ): ResolvedMark | null {
+    const adapter = stroke.adapter;
     let sizeMultiplier = 1;
     let alpha = mark.alpha;
     let red = mark.red;
@@ -897,6 +1043,77 @@ export class CuratedLiveRoomRenderer {
       y += Math.sin(direction) * reach + Math.cos(direction) * sideways;
       sizeMultiplier = .28 + open * 1.18;
       angle += Math.sin(age * 2 + mark.seed * Math.PI * 2) * 9 * Math.PI / 180;
+    } else if (adapter.kind === "curve-current") {
+      const path = stroke.curvePath;
+      if (!path || mark.life <= 0) return null;
+      const globalProgress = clamp(age / mark.life, 0, 1);
+      const startTime = mark.curveOrder * adapter.startStagger;
+      const endTime = startTime + adapter.activeWindow;
+      if (globalProgress < startTime || globalProgress >= endTime) return null;
+      const localProgress = clamp(
+        (globalProgress - startTime) / Math.max(.001, adapter.activeWindow),
+        0,
+        1,
+      );
+      if (localProgress < adapter.arriveAt) {
+        const progress = localProgress / Math.max(.001, adapter.arriveAt);
+        const eased = progress * progress * (3 - 2 * progress);
+        const targetDistance = mark.curveStartDistance
+          + (path.total - mark.curveStartDistance) * eased;
+        let upperIndex = 1;
+        if (targetDistance >= path.total) {
+          upperIndex = path.points.length - 1;
+        } else if (targetDistance > 0) {
+          let low = 1;
+          let high = path.points.length - 1;
+          while (low < high) {
+            const middle = Math.floor((low + high) / 2);
+            if (path.points[middle]!.distance < targetDistance) low = middle + 1;
+            else high = middle;
+          }
+          upperIndex = low;
+        }
+        const before = path.points[upperIndex - 1]!;
+        const after = path.points[upperIndex]!;
+        const segmentLength = Math.max(.0001, after.distance - before.distance);
+        const amount = clamp((targetDistance - before.distance) / segmentLength, 0, 1);
+        const tangentX = (after.x - before.x) / segmentLength;
+        const tangentY = (after.y - before.y) / segmentLength;
+        const side = mark.curveSideDistance * (1 - eased) ** .8;
+        const wobble = Math.sin(progress * Math.PI * 3.6 + mark.seed * Math.PI * 2)
+          * adapter.wobble
+          * Math.sin(progress * Math.PI);
+        const sideways = side + wobble;
+        x = before.x + (after.x - before.x) * amount - tangentY * sideways;
+        y = before.y + (after.y - before.y) * amount + tangentX * sideways;
+        angle = Math.atan2(tangentY, tangentX);
+        const fadeIn = clamp(progress / .12, 0, 1);
+        const smoothFadeIn = fadeIn * fadeIn * (3 - 2 * fadeIn);
+        sizeMultiplier = .72 + Math.sin(progress * Math.PI) * .62;
+        const desiredAlpha = .86 * smoothFadeIn;
+        const runtimeFade = globalProgress <= .7
+          ? 1
+          : Math.max(.001, (1 - globalProgress) / .3);
+        alpha = Math.min(1, desiredAlpha / runtimeFade)
+          * clamp(adapter.photoOpacity, 0, 100) / 100;
+      } else {
+        const progress = (localProgress - adapter.arriveAt) / Math.max(.001, 1 - adapter.arriveAt);
+        const inward = progress * progress * (3 - 2 * progress);
+        x = path.endpointX;
+        y = path.endpointY;
+        angle = path.endpointAngle;
+        sizeMultiplier = .72 * (1 - inward) ** .62 + .01;
+        const desiredAlpha = .86 * (1 - inward) ** .58;
+        const runtimeFade = globalProgress <= .7
+          ? 1
+          : Math.max(.001, (1 - globalProgress) / .3);
+        alpha = Math.min(1, desiredAlpha / runtimeFade)
+          * clamp(adapter.photoOpacity, 0, 100) / 100;
+      }
+      softIdx = Math.max(
+        softIdx,
+        Math.round(Math.max(.45, clamp(adapter.photoBlur, 0, 40) / 40) * 3),
+      );
     } else {
       const wanderAge = Math.min(age, 4);
       const angle = Math.sin(layerSeconds * .57 + mark.seed * 11) * Math.PI * 1.7
@@ -911,22 +1128,22 @@ export class CuratedLiveRoomRenderer {
       if (remain < .3) alpha *= Math.max(0, remain / .3);
     }
     if (alpha <= .01) return null;
-    return {
-      x,
-      y,
-      size: Math.min(MAX_RENDERED_MARK_SIZE, mark.size * clamp(sizeMultiplier, .05, 20)),
-      alpha,
-      red,
-      green,
-      blue,
-      shape: mark.shape,
-      softIdx,
-      angle,
-      glow: mark.glow,
-      atlasIndex: mark.atlasIndex,
-      atlasVariantCount: mark.atlasVariantCount,
-      atlasBaseSize: mark.size,
-    };
+    const resolved = this.resolvedMark;
+    resolved.x = x;
+    resolved.y = y;
+    resolved.size = Math.min(MAX_RENDERED_MARK_SIZE, mark.size * clamp(sizeMultiplier, .05, 20));
+    resolved.alpha = alpha;
+    resolved.red = red;
+    resolved.green = green;
+    resolved.blue = blue;
+    resolved.shape = mark.shape;
+    resolved.softIdx = softIdx;
+    resolved.angle = angle;
+    resolved.glow = mark.glow;
+    resolved.atlasIndex = mark.atlasIndex;
+    resolved.atlasVariantCount = mark.atlasVariantCount;
+    resolved.atlasBaseSize = mark.size;
+    return resolved;
   }
 
   private photo(x: number, y: number): readonly [number, number, number] | null {

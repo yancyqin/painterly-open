@@ -28,7 +28,7 @@ import {
   type LivePaintMark,
   type PoseId,
 } from "./game/types";
-import { randomRoomName } from "./roomNames.js";
+import { randomRoomName, randomRoomNameExcept } from "./roomNames.js";
 import encodeQR from "qr";
 
 // The share/manage screen is a modal (#manage-dialog), not a view. "explore-view"
@@ -180,9 +180,7 @@ async function initializeApp(): Promise<void> {
 // Reshuffle the room name + look (was the "↻" room-name button). One control
 // refreshes both the name and the room's surface/seed.
 function rerollRoom(): void {
-  let next = randomRoomName();
-  for (let attempt = 0; attempt < 4 && next === draft.roomName; attempt += 1) next = randomRoomName();
-  draft.roomName = next;
+  draft.roomName = randomRoomNameExcept(draft.roomName);
   draft.surface = ((draft.surface + 1) % 3) as 0 | 1 | 2;
   draft.artSeed = randomSeed();
   hiderScene.setRoomTexture(draft.surface, draft.artSeed);
@@ -655,6 +653,10 @@ async function publishChallenge(): Promise<void> {
         isPublic,
       }),
     });
+    // Keep the published name with that challenge; prepare a genuinely new
+    // name for the next hide, rather than allowing the same two-word name.
+    draft.roomName = randomRoomNameExcept(result.roomName);
+    hiderScene.setHudState({ roomName: draft.roomName });
     localStorage.setItem(hiderKeyName(result.token), result.hiderKey);
     const localResult = { ...result, playUrl: playLinkFor(result), shareImage: shareImage || undefined };
     // One page: keep the base URL and drop into the Lobby with the share modal.

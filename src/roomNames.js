@@ -36,3 +36,20 @@ export function randomRoomName(random = Math.random) {
   const noun = ROOM_NAME_NOUNS[Math.floor(random() * ROOM_NAME_NOUNS.length) % ROOM_NAME_NOUNS.length];
   return `${adjective} ${noun}`;
 }
+
+export function randomRoomNameExcept(excludedName, random = Math.random) {
+  const excluded = normalizeRoomName(excludedName);
+  if (!excluded) return randomRoomName(random);
+
+  const [excludedAdjective, excludedNoun] = excluded.split(" ");
+  const excludedIndex = (
+    ROOM_NAME_ADJECTIVES.indexOf(excludedAdjective) * ROOM_NAME_NOUNS.length
+    + ROOM_NAME_NOUNS.indexOf(excludedNoun)
+  );
+  const combinationCount = ROOM_NAME_ADJECTIVES.length * ROOM_NAME_NOUNS.length;
+  const candidate = Math.floor(random() * (combinationCount - 1)) % (combinationCount - 1);
+  const index = candidate >= excludedIndex ? candidate + 1 : candidate;
+  const adjective = ROOM_NAME_ADJECTIVES[Math.floor(index / ROOM_NAME_NOUNS.length)];
+  const noun = ROOM_NAME_NOUNS[index % ROOM_NAME_NOUNS.length];
+  return `${adjective} ${noun}`;
+}

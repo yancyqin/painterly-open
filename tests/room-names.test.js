@@ -5,6 +5,7 @@ import {
   normalizeRoomName,
   normalizeRoomSearch,
   randomRoomName,
+  randomRoomNameExcept,
 } from "../src/roomNames.js";
 
 test("room names are exactly two words from the kid-safe vocabulary", () => {
@@ -25,4 +26,10 @@ test("room search accepts an English one- or two-word prefix", () => {
 test("room name generation is deterministic when given a random source", () => {
   assert.equal(randomRoomName(() => 0), "Blue Bird");
   assert.equal(randomRoomName(() => 0.999999), "Wild Willow");
+});
+
+test("the next hide name cannot reuse the current two-word combination", () => {
+  assert.equal(randomRoomNameExcept("Blue Bird", () => 0), "Blue Bloom");
+  assert.equal(randomRoomNameExcept("Wild Willow", () => 0.999999), "Wild Turtle");
+  assert.notEqual(randomRoomNameExcept("Sunny Garden", () => 0.5), "Sunny Garden");
 });

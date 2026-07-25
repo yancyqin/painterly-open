@@ -87,6 +87,10 @@ const SEEKER_CLOSE_LOOK_ENABLED = true;
 // isn't accidentally halved to 30 by frame jitter. The live FX keeps its own
 // 30fps rebuild cap on top of this.
 const PLAY_FRAME_MS = 1000 / 62;
+// In Seeker view the hidden chameleon belongs to the room artwork, not the
+// foreground actor stack. Floor/surface props use -850; this places the Hider
+// just above them but behind furniture and the moving Seeker.
+const SEEKER_HIDER_BACKGROUND_DEPTH = -800;
 
 interface ActorPosition {
   roomIndex: RoomIndex;
@@ -1154,7 +1158,7 @@ export class GameCanvas {
       const avatar = this.avatarSource ?? cachedImage(this.avatarUrl, redraw);
       if (!imageReady(avatar)) foregroundReady = false;
       layers.push({
-        depth: this.target.y,
+        depth: this.mode === "seeker" ? SEEKER_HIDER_BACKGROUND_DEPTH : this.target.y,
         draw: () => this.drawAvatar(avatar),
       });
     }

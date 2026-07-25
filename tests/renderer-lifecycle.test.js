@@ -236,3 +236,10 @@ test("1B Live omits only the duplicate paint-splashed rug", () => {
 test("Seeker movement keeps the Hider Live avatar animating", () => {
   assert.match(gameCanvas, /this\.livePainting\?\.marks\.length[\s\S]*?\(this\.mode === "seeker" \|\| !this\.actorMoving\)/);
 });
+
+test("Seeker view treats the hidden chameleon as room artwork", () => {
+  assert.match(gameCanvas, /const SEEKER_HIDER_BACKGROUND_DEPTH = -800/);
+  assert.match(gameCanvas, /depth: this\.mode === "seeker" \? SEEKER_HIDER_BACKGROUND_DEPTH : this\.target\.y/);
+  assert.doesNotMatch(gameCanvas, /clipHiderBehindSeeker/);
+  assert.match(gameCanvas, /layers\.sort\(\(a, b\) => a\.depth - b\.depth\)/);
+});

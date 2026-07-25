@@ -243,3 +243,10 @@ test("Seeker view treats the hidden chameleon as room artwork", () => {
   assert.doesNotMatch(gameCanvas, /clipHiderBehindSeeker/);
   assert.match(gameCanvas, /layers\.sort\(\(a, b\) => a\.depth - b\.depth\)/);
 });
+
+test("Hider and Seeker use the same aligned actor image frame", () => {
+  assert.match(gameCanvas, /const ACTOR_IMAGE_SIZE = 90/);
+  assert.match(gameCanvas, /const ACTOR_IMAGE_TOP_OFFSET = 76/);
+  assert.equal((gameCanvas.match(/ACTOR_IMAGE_SIZE,\n\s+ACTOR_IMAGE_SIZE,/g) ?? []).length, 2);
+  assert.equal((gameCanvas.match(/- ACTOR_IMAGE_TOP_OFFSET/g) ?? []).length, 2);
+});

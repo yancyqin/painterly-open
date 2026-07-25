@@ -87,6 +87,11 @@ const SEEKER_CLOSE_LOOK_ENABLED = true;
 // isn't accidentally halved to 30 by frame jitter. The live FX keeps its own
 // 30fps rebuild cap on top of this.
 const PLAY_FRAME_MS = 1000 / 62;
+// The hidden Hider and the moving Seeker use the same authored square and must
+// occupy the same visual frame. This is the midpoint between their former
+// 100px and 80px draws: Hider is slightly smaller, Seeker slightly larger.
+const ACTOR_IMAGE_SIZE = 90;
+const ACTOR_IMAGE_TOP_OFFSET = 76;
 // In Seeker view the hidden chameleon belongs to the room artwork, not the
 // foreground actor stack. Floor/surface props use -850; this places the Hider
 // just above them but behind furniture and the moving Seeker.
@@ -1881,7 +1886,13 @@ export class GameCanvas {
         Math.max(0, performance.now() - this.liveStartedAt) / 1_000,
       )
       : source;
-    this.ctx.drawImage(displaySource, this.target.x - 50, this.target.y - 82, 100, 100);
+    this.ctx.drawImage(
+      displaySource,
+      this.target.x - ACTOR_IMAGE_SIZE / 2,
+      this.target.y - ACTOR_IMAGE_TOP_OFFSET,
+      ACTOR_IMAGE_SIZE,
+      ACTOR_IMAGE_SIZE,
+    );
     this.ctx.restore();
   }
 
@@ -1908,7 +1919,13 @@ export class GameCanvas {
       this.ctx.scale(-1, 1);
       this.ctx.translate(-x, 0);
     }
-    this.ctx.drawImage(source, x - 40, y - 70, 80, 80);
+    this.ctx.drawImage(
+      source,
+      x - ACTOR_IMAGE_SIZE / 2,
+      y - ACTOR_IMAGE_TOP_OFFSET,
+      ACTOR_IMAGE_SIZE,
+      ACTOR_IMAGE_SIZE,
+    );
     this.ctx.restore();
   }
 
